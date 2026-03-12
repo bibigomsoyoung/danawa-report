@@ -1,0 +1,44 @@
+[
+  {
+    "week": 4,
+    "title": "4주차 주간 보고서",
+    "period": "3월 2일 – 3월 8일",
+    "filename": "week04.html",
+    "uploadedAt": "2025-03-12",
+    "tags": [
+      { "label": "PV ▲6.5%", "type": "up" },
+      { "label": "UV ▲9.8%", "type": "up" },
+      { "label": "콘텐츠 PV ▲6.5%", "type": "" }
+    ]
+  },
+  {
+    "week": 3,
+    "title": "3주차 주간 보고서",
+    "period": "2월 23일 – 3월 1일",
+    "filename": "week03.html",
+    "uploadedAt": "2025-03-05",
+    "tags": [
+      { "label": "PV 대폭 증가", "type": "up" }
+    ]
+  },
+  {
+    "week": 2,
+    "title": "2주차 주간 보고서",
+    "period": "2월 16일 – 2월 22일",
+    "filename": "week02.html",
+    "uploadedAt": "2025-02-26",
+    "tags": [
+      { "label": "런칭 초기", "type": "" }
+    ]
+  },
+  {
+    "week": 1,
+    "title": "1주차 주간 보고서",
+    "period": "2월 9일 – 2월 15일",
+    "filename": "week01.html",
+    "uploadedAt": "2025-02-19",
+    "tags": [
+      { "label": "런칭", "type": "green" }
+    ]
+  }
+]
