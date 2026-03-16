@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>답나와 주간 보고서 — 1주차 (2/11~2/15)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root {
+    --c-bg: #f5f5f3; --c-white: #ffffff; --c-ink: #1a1a1a; --c-mid: #555555;
+    --c-light: #888888; --c-border: #e0e0de; --c-border-strong: #838380;
+    --c-accent: #e85c2b; --c-up: #d63b3b; --c-down: #2a7de1;
+    --c-tag: #f0ede8; --c-highlight: #fff7e6; --c-highlight-border: #f5a623;
+    --c-gray-text: #bbbbbb; --c-new: #2a9d57;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: var(--c-bg); color: var(--c-ink); font-size: 14.5px; line-height: 1.6; }
+  .report-header { background: var(--c-white); border-bottom: 2px solid var(--c-ink); padding: 24px 32px 20px; }
+  .report-header .label { font-size: 11px; color: var(--c-light); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .report-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .report-header .meta { margin-top: 8px; color: var(--c-mid); font-size: 12px; }
+  .report-header .meta span { margin-right: 16px; }
+  .tab-nav { background: var(--c-white); border-bottom: 1px solid var(--c-border); padding: 0 32px; display: flex; gap: 0; position: sticky; top: 0; z-index: 100; }
+  .tab-btn { padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--c-light); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: color 0.15s; }
+  .tab-btn:hover { color: var(--c-ink); }
+  .tab-btn.active { color: var(--c-ink); border-bottom-color: var(--c-accent); }
+  .tab-content { display: none; padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: var(--c-white); border: 1px solid var(--c-border); padding: 16px 18px; position: relative; }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--c-light); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .kpi-card .kpi-wow-large { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 5px; }
+  .kpi-card .kpi-flow { font-size: 12px; color: var(--c-light); }
+  .kpi-card .kpi-val-only { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .kpi-card.kpi-up { border: 2px solid #d63b3b; }
+  .kpi-card.kpi-down { border: 2px solid #2a7de1; }
+  .wow-up { color: var(--c-up); } .wow-down { color: var(--c-down); }
+  .tt { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--c-border); color: var(--c-light); border-radius: 50%; font-size: 9px; cursor: help; font-weight: 700; flex-shrink: 0; position: relative; }
+  .tt:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; font-size: 11px; font-weight: 400; white-space: pre-line; padding: 6px 10px; border-radius: 4px; min-width: 200px; max-width: 280px; z-index: 999; line-height: 1.5; pointer-events: none; }
+  .insight-box { background: var(--c-white); border: 1px solid var(--c-border); padding: 20px 22px; margin-bottom: 16px; }
+  .insight-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .insight-box h3 .badge { background: var(--c-ink); color: white; font-size: 10px; padding: 2px 6px; font-weight: 600; }
+  .insight-box h3 .badge.up { background: var(--c-up); } .insight-box h3 .badge.down { background: var(--c-down); }
+  .insight-box h3 .badge.note { background: var(--c-mid); } .insight-box h3 .badge.new { background: var(--c-new); }
+  .insight-box ul { list-style: none; padding: 0; }
+  .insight-box ul li { color: var(--c-mid); font-size: 14.5px; line-height: 1.8; padding-left: 14px; position: relative; }
+  .insight-box ul li::before { content: '·'; position: absolute; left: 3px; color: var(--c-light); }
+  .insight-box ul li strong { color: var(--c-ink); }
+  .insight-box ul li + li { margin-top: 4px; }
+  .tab-analysis-title { font-size: 18px; font-weight: 800; color: var(--c-ink); letter-spacing: -0.02em; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--c-ink); }
+  .tab-analysis-title span { font-size: 13px; font-weight: 400; color: var(--c-light); margin-left: 10px; }
+  .section-title { font-size: 16px; font-weight: 700; color: var(--c-mid); border-bottom: 1px solid var(--c-border); padding-bottom: 8px; margin-bottom: 16px; margin-top: 28px; }
+  .section-title:first-child { margin-top: 0; }
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; background: var(--c-white); font-size: 12px; }
+  thead th { background: #f0ede8; font-weight: 700; padding: 7px 10px; text-align: center; border: 1px solid var(--c-border); white-space: nowrap; }
+  thead th.sticky-col { position: sticky; left: 0; background: #e8e5e0; z-index: 2; }
+  thead tr.week-header th { background: #e8e5e0; font-size: 11px; }
+  thead tr.week-header th.cur-week { background: #fdf3d0; }
+  tbody td { padding: 6px 10px; border: 1px solid var(--c-border); text-align: right; white-space: nowrap; }
+  tbody td.sticky-col { position: sticky; left: 0; background: var(--c-white); z-index: 1; text-align: left; font-weight: 600; border-right: 2px solid var(--c-border-strong); }
+  tbody td.sub-label { text-align: left; color: var(--c-mid); padding-left: 22px; font-weight: 400; }
+  tbody tr:hover td { background: #fafaf8; }
+  tbody tr:hover td.sticky-col { background: #f5f3f0; }
+  tr.group-header td { background: #f7f5f2; font-weight: 700; color: var(--c-ink); border-top: 3px solid #555550; }
+  tr.group-header td.sticky-col { background: #f0ede8; border-top: 3px solid #555550; }
+  tr.sub-group td { border-top: 2px solid var(--c-border-strong); }
+  tr.sub-group td.sticky-col { border-top: 2px solid var(--c-border-strong); }
+  td.wow-up { color: var(--c-up); font-weight: 600; } td.wow-down { color: var(--c-down); font-weight: 600; }
+  td.cur-week { background: #fffbf0 !important; font-weight: 700; }
+  td.cur-week.sticky-col { background: #ffeeca !important; }
+  td.bold { font-weight: 700; }
+  td.week-start, th.week-start { border-left: 2px solid var(--c-border-strong) !important; }
+  td.gray-val { color: var(--c-gray-text); }
+  td.new-tag::after { content: 'NEW'; background: var(--c-new); color: white; font-size: 9px; padding: 1px 4px; margin-left: 5px; vertical-align: middle; font-weight: 700; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-row.single { grid-template-columns: 1fr; }
+  .chart-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-card { background: var(--c-white); border: 1px solid var(--c-border); padding: 20px; }
+  .chart-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--c-mid); }
+  .chart-card canvas { max-height: 260px; }
+  .chart-card.tall canvas { max-height: 360px; }
+  .tag { display: inline-block; background: var(--c-tag); border: 1px solid var(--c-border); padding: 2px 7px; font-size: 10px; color: var(--c-mid); margin-right: 4px; }
+  .tag.green { background: #eefbf1; border-color: #a4ddb5; color: var(--c-new); }
+  .notice { background: #f0ede8; border-left: 3px solid var(--c-mid); padding: 10px 14px; font-size: 14px; color: var(--c-mid); margin-bottom: 16px; line-height: 1.7; }
+  .notice strong { color: var(--c-ink); }
+  .notice.important { background: var(--c-highlight); border-left-color: var(--c-highlight-border); }
+  @media (max-width: 900px) {
+    .tab-content { padding: 16px; }
+    .chart-row, .chart-row.triple { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="label">답나와 서비스 주간 보고서</div>
+  <h1>1주차 보고서&thinsp;—&thinsp;2026년 2월 11일 ~ 2월 15일</h1>
+  <div class="meta">
+    <span>발행일 2026.02.17</span>
+    <span>데이터 출처: UXLOG</span>
+    <span>서비스 오픈일 2026.02.11</span>
+  </div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('summary')">핵심 요약</button>
+  <button class="tab-btn" onclick="showTab('entry')">답나와 진입점</button>
+  <button class="tab-btn" onclick="showTab('mainpv')">메인 PV</button>
+  <button class="tab-btn" onclick="showTab('contentpv')">콘텐츠 PV</button>
+  <button class="tab-btn" onclick="showTab('mainclick')">메인 주요 클릭</button>
+  <button class="tab-btn" onclick="showTab('contentclick')">콘텐츠 주요 클릭</button>
+</nav>
+
+<!-- ===== TAB 1: 핵심 요약 ===== -->
+<div id="tab-summary" class="tab-content active">
+
+  <div class="notice important">
+    <strong>측정 기간:</strong> 2026.02.11(수) ~ 2026.02.15(일), 5일간 (오픈 초기 + 설 연휴 포함) &nbsp;|&nbsp;
+    <strong>이번 주 핵심:</strong> 서비스 오픈 직후 PC 중심 초기 탐색 흐름 형성 — 설 연휴 영향으로 단순 수치 비교 시 해석 주의.
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">메인 PV (합계) <span class="tt" data-tip="다나와 통합메인에서 답나와 메인으로 진입한 총 페이지뷰&#10;PC웹 + M웹 + APP 주간 합계&#10;오픈 첫 주 (5일, 설 연휴 포함)">?</span></div>
+      <div class="kpi-val-only">3,782</div>
+      <div class="kpi-flow">일평균 756</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">콘텐츠 PV (합계) <span class="tt" data-tip="답나와 콘텐츠 전체 페이지뷰 합산&#10;PC웹 + M웹 + APP 주간 합계">?</span></div>
+      <div class="kpi-val-only">1,460</div>
+      <div class="kpi-flow">일평균 292</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PC 진입점 (상단 바로가기) <span class="tt" data-tip="다나와 PC 통합메인 GNB '답나와' 탭 클릭수&#10;고정 노출되는 PC 진입점">?</span></div>
+      <div class="kpi-val-only">1,658</div>
+      <div class="kpi-flow">고정 진입점 합계 1,841</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">모바일 진입점 (프로모션) <span class="tt" data-tip="다나와 모바일 메인 상단 프로모션 배너 클릭수&#10;고정 노출 (스와이프 필요)&#10;M웹 + APP 합산">?</span></div>
+      <div class="kpi-val-only">177</div>
+      <div class="kpi-flow">M웹 57 / APP 116</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <h4>주차별 메인 PV 추이</h4>
+      <canvas id="chartMainPV_s"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>주차별 콘텐츠 PV 추이</h4>
+      <canvas id="chartContentPV_s"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">이번 주 인사이트 요약</div>
+
+  <div class="insight-box">
+    <h3><span class="badge note">오픈</span> 서비스 오픈 직후 초기 탐색 흐름 형성 — 설 연휴 포함 5일 기준</h3>
+    <ul>
+      <li>오픈 직후 PC 통합메인 GNB 고정 진입점을 통해 답나와 메인으로의 유입이 안정적으로 발생 — PC 서비스바로가기 <strong>1,658회</strong></li>
+      <li>메인 PV <strong>3,782</strong>(일평균 756), 콘텐츠 PV <strong>1,460</strong>(일평균 292) — PC 중심 탐색 흐름. 1주차는 오픈 초기 5일 + 설 연휴 영향으로 단순 수치 비교 시 주의</li>
+      <li>고정 진입점 합계(1,841) 대비 콘텐츠 PV(1,460)는 약 0.8배 수준 — 메인 경유 후 콘텐츠 탐색까지의 기본 흐름 형성</li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <h3><span class="badge note">탐색</span> RAM 관심 1위 · 하락률순·판매량순 정렬 선호 · p2+ 탐색 89%</h3>
+    <ul>
+      <li>가격동향 카테고리: <strong>RAM(610) > 엔비디아VGA(555) > AMD CPU(526)</strong> — RAM이 전체의 22.9%. 가격 변동성·업그레이드 탐색 수요 반영</li>
+      <li>정렬 선호: 판매량순(208) > 하락률순(177) > 상승률순(164) — 가격 타이밍과 검증된 제품 동시 탐색 성향</li>
+      <li>데이터기준: 30일(470) > 15일(345) > 7일(198) — 장기 추세 기반 신중한 구매 성향. p2+ 탐색 비율 <strong>89.3%</strong>(p2 338회 vs p1 106회) — 적극적 탐색 의도</li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <h3><span class="badge up">콘텐츠</span> 도움이됐어요 218건(반응률 14.9%) — 오픈 초기 콘텐츠 만족도 높게 형성</h3>
+    <ul>
+      <li>콘텐츠 PV 1,460 대비 '도움이됐어요' 클릭 <strong>218건(14.9%)</strong> — 오픈 초기 탐색 유저들의 높은 콘텐츠 만족도</li>
+      <li>상위 콘텐츠: 플라스틱/알루미늄 키보드(342) · cable-species 비교(291) · 공기청정기 요약(199) — PC부품 외 가전·모바일 카테고리 콘텐츠도 고르게 소비됨</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ===== TAB 2: 답나와 진입점 ===== -->
+<div id="tab-entry" class="tab-content">
+  <h2 class="tab-analysis-title">1주차 분석 <span>답나와 진입점</span></h2>
+
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3>오픈 직후 PC 고정 진입점 안정적 작동 · 모바일 APP 비중 높아</h3>
+    <ul>
+      <li>PC 서비스바로가기 <strong>1,658회</strong> — 시각적으로 강조된 GNB 진입점을 통해 오픈 직후부터 안정적으로 유입 발생</li>
+      <li>모바일 프로모션 배너 177회 중 APP 116(65.5%) > M웹 57(32.2%) — 앱 이용자의 초기 관심이 상대적으로 높았음</li>
+    </ul>
+  </div>
+
+  <div class="section-title">고정 진입점 클릭 (1주차)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:220px">진입점</th>
+          <th>합계</th><th>PC웹</th><th>M웹</th><th>APP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">고정 진입점 전체</td>
+          <td class="bold">1,841</td><td>1,662</td><td>63</td><td>116</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">PC 서비스바로가기 (GNB 고정)</td>
+          <td class="bold">1,664</td><td class="bold">1,658</td><td class="gray-val">6</td><td class="gray-val">0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">모바일 프로모션배너 (M 고정)</td>
+          <td class="bold">177</td><td class="gray-val">4</td><td class="bold">57</td><td class="bold">116</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 3: 메인 PV ===== -->
+<div id="tab-mainpv" class="tab-content">
+  <h2 class="tab-analysis-title">1주차 분석 <span>답나와 메인 PV</span></h2>
+
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3>메인 PV 3,782 (5일 합계) — PC 중심 유입, 일평균 756</h3>
+    <ul>
+      <li>PC웹 3,342(88.4%) 중심 — 설 연휴·오픈 초기 특성상 모바일(M+APP 440) 비중은 11.6%</li>
+      <li>오픈 5일간 일평균 756PV — 이후 주차 비교 기준값으로 활용</li>
+    </ul>
+  </div>
+
+  <div class="section-title">메인 PV (1주차)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:130px">구분</th>
+          <th>합계</th><th>PC웹</th><th>M웹</th><th>APP</th><th>M+APP</th><th>일평균</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">합계</td>
+          <td class="bold">3,782</td><td>3,342</td><td>279</td><td>161</td><td>440</td><td>756</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">PC웹</td>
+          <td>3,342</td><td class="bold">3,342</td><td>—</td><td>—</td><td>—</td><td>668</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">M웹</td>
+          <td>279</td><td>—</td><td class="bold">279</td><td>—</td><td>—</td><td>56</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">APP</td>
+          <td>161</td><td>—</td><td>—</td><td class="bold">161</td><td>—</td><td>32</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 4: 콘텐츠 PV ===== -->
+<div id="tab-contentpv" class="tab-content">
+  <h2 class="tab-analysis-title">1주차 분석 <span>답나와 콘텐츠 PV</span></h2>
+
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3>콘텐츠 PV 1,460 — 다양한 카테고리 고르게 탐색</h3>
+    <ul>
+      <li>상위 콘텐츠: 키보드 하우징 차이(342, 23.4%) · cable-species 비교(291, 19.9%) · 프리미엄 공기청정기 요약(199, 13.6%) — PC부품 외 모바일·가전 콘텐츠도 고르게 소비</li>
+      <li>모바일(M+APP) 콘텐츠 비중 371/1,460 = <strong>25.4%</strong> — 메인 PV 모바일 비중(11.6%)보다 높아, 콘텐츠에서 모바일 참여도가 상대적으로 강함</li>
+    </ul>
+  </div>
+
+  <div class="section-title">1주차 콘텐츠별 PV</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:280px">콘텐츠 (클릭 시 이동)</th>
+          <th>합계</th><th>점유율</th><th>PC웹</th><th>M웹</th><th>APP</th><th>M+APP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/what-is-the-difference-between-plastic-and-aluminum-keyboard" target="_blank" style="color:var(--c-ink);text-decoration:none;font-weight:700">플라스틱과 알루미늄, 키보드 하우징이 다르면 어떤 차이?</a></td>
+          <td class="bold">342</td><td>23.4%</td><td>276</td><td>36</td><td>30</td><td>66</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/cable-species-comparison-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">cable-species-comparison-performance-benchmarks <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>291</td><td>19.9%</td><td>147</td><td>61</td><td>83</td><td>144</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/premium-air-purifier-benchmark-key-summary" target="_blank" style="color:var(--c-ink);text-decoration:none">프리미엄 공기청정기 벤치마크 핵심 요약</a></td>
+          <td>199</td><td>13.6%</td><td>129</td><td>37</td><td>33</td><td>70</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/benchmark-highlights-1" target="_blank" style="color:var(--c-ink);text-decoration:none">benchmark-highlights-1 <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>107</td><td>7.3%</td><td>97</td><td>6</td><td>4</td><td>10</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/youngdaes-living-room-book-gonorrhea-real-air-purifier-5-1" target="_blank" style="color:var(--c-ink);text-decoration:none">30평대 프리미엄 공기청정기 5종 비교 성능 벤치마크</a></td>
+          <td>94</td><td>6.4%</td><td>78</td><td>8</td><td>8</td><td>16</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/mac-safe-power-bank-benchmark-key-summary-1" target="_blank" style="color:var(--c-ink);text-decoration:none">맥세이프 보조배터리 벤치마크 핵심 요약</a></td>
+          <td>93</td><td>6.4%</td><td>81</td><td>4</td><td>8</td><td>12</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/iphone-mac-safe-auxiliary-battery-performance-benchmark" target="_blank" style="color:var(--c-ink);text-decoration:none">아이폰 맥세이프 보조배터리 10종 비교 성능 벤치마크</a></td>
+          <td>68</td><td>4.7%</td><td>59</td><td>9</td><td>0</td><td>9</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/gamepad-buying-guide" target="_blank" style="color:var(--c-ink);text-decoration:none">2만 원대 보급형부터 30만 원까지 포진한 게임패드 알아보기</a></td>
+          <td>59</td><td>4.0%</td><td>55</td><td>1</td><td>3</td><td>4</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/premium-air-purification" target="_blank" style="color:var(--c-ink);text-decoration:none">premium-air-purification <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>56</td><td>3.8%</td><td>42</td><td>7</td><td>7</td><td>14</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/species-comparison-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">species-comparison-performance-benchmarks <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>52</td><td>3.6%</td><td>50</td><td>2</td><td>0</td><td>2</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/mac-safe-power-bank-benchmark-key-summary" target="_blank" style="color:var(--c-ink);text-decoration:none">mac-safe-power-bank-benchmark-key-summary <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>34</td><td>2.3%</td><td>24</td><td>0</td><td>10</td><td>10</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/summary-of-graphics-card-benchmark-results-as-of-january" target="_blank" style="color:var(--c-ink);text-decoration:none">그래픽카드 18종 벤치마크 핵심 요약</a></td>
+          <td>21</td><td>1.4%</td><td>16</td><td>5</td><td>0</td><td>5</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/benchmark-highlights" target="_blank" style="color:var(--c-ink);text-decoration:none">benchmark-highlights <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>21</td><td>1.4%</td><td>15</td><td>2</td><td>4</td><td>6</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/test-3" target="_blank" style="color:var(--c-ink);text-decoration:none">test-3 <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>10</td><td>0.7%</td><td>10</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/gamepad-summary" target="_blank" style="color:var(--c-ink);text-decoration:none">gamepad-summary <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>8</td><td>0.5%</td><td>5</td><td>3</td><td>0</td><td>3</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/test-2" target="_blank" style="color:var(--c-ink);text-decoration:none">test-2 <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>4</td><td>0.3%</td><td>4</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/buying-guide-gamepad" target="_blank" style="color:var(--c-ink);text-decoration:none">buying-guide-gamepad <span class="tt" data-tip="제목 확인 불가 — slug로 대체">?</span></a></td>
+          <td>1</td><td>0.1%</td><td>1</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr class="group-header">
+          <td class="sticky-col">합계</td>
+          <td class="bold">1,460</td><td class="bold">100%</td><td class="bold">1,089</td><td class="bold">181</td><td class="bold">190</td><td class="bold">371</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notice">콘텐츠 제목은 웹페이지 직접 접근 또는 slug 기반 추정. 제목 확인이 어려운 콘텐츠는 slug 그대로 표기.</div>
+</div>
+
+<!-- ===== TAB 5: 메인 주요 클릭 ===== -->
+<div id="tab-mainclick" class="tab-content">
+  <h2 class="tab-analysis-title">1주차 분석 <span>답나와 메인 주요 클릭</span></h2>
+
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3>RAM 카테고리 1위 · 판매량순·하락률순 정렬 선호 · p2+ 탐색 89%</h3>
+    <ul>
+      <li>카테고리: <strong>RAM(610) > 엔비디아VGA(555) > AMD CPU(526)</strong> — RAM 22.9%로 1위. 가격 변동성 높은 시기 업그레이드 탐색 수요 반영</li>
+      <li>정렬: 판매량순(208) > 하락률순(177) > 상승률순(164) — 검증된 인기 제품과 가격 타이밍 동시 탐색</li>
+      <li>데이터기준: 30일(470) 선호 — 단기보다 장기 추세 기반 신중한 탐색 성향. p2+ 비율 <strong>89.3%</strong> — 적극적 탐색 의도 오픈 초기부터 확인</li>
+    </ul>
+  </div>
+
+  <div class="section-title">메인 주요 클릭 전체 (1주차)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:60px">대분류</th>
+          <th class="sticky-col" style="min-width:60px;left:60px">중분류</th>
+          <th class="sticky-col" style="min-width:200px;left:120px">항목</th>
+          <th>합계</th><th>PC웹</th><th>M웹</th><th>APP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="4">HTML</td>
+          <td class="sticky-col" style="left:60px">—</td>
+          <td class="sticky-col" style="left:120px">HTML top+middle (콘텐츠 내부 이동)</td>
+          <td class="bold">1,157</td><td>901</td><td>124</td><td>132</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">top</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_html_top</td>
+          <td class="bold">879</td><td>645</td><td>111</td><td>123</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">middle</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_html_middle</td>
+          <td>278</td><td>256</td><td>13</td><td>9</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">bottom</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_html_bottom (YouTube 이동)</td>
+          <td>249</td><td>200</td><td>24</td><td>25</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="7">가격동향</td>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col" style="left:120px">카테고리 합계 (6종)</td>
+          <td class="bold">2,663</td><td>2,297</td><td>319</td><td>47</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_RAM</td>
+          <td class="bold">610</td><td>504</td><td>87</td><td>19</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_엔비디아VGA</td>
+          <td>555</td><td>482</td><td>67</td><td>6</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_AMDCPU</td>
+          <td>526</td><td>457</td><td>62</td><td>7</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_AMDVGA</td>
+          <td>413</td><td>362</td><td>45</td><td>6</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_SSD</td>
+          <td>338</td><td>288</td><td>44</td><td>6</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">카테고리</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_인텔CPU</td>
+          <td>221</td><td>204</td><td>14</td><td>3</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="4">가격동향</td>
+          <td class="sticky-col" style="left:60px">정렬기준</td>
+          <td class="sticky-col" style="left:120px">메인_가격동향_판매량순</td>
+          <td class="bold">208</td><td>177</td><td>31</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">정렬기준</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_하락률순</td>
+          <td>177</td><td>151</td><td>22</td><td>4</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">정렬기준</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_상승률순</td>
+          <td>164</td><td>134</td><td>22</td><td>8</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">정렬기준</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_오늘인기순 <span class="tag" style="font-size:9px">기본값</span></td>
+          <td class="gray-val">77</td><td class="gray-val">61</td><td class="gray-val">14</td><td class="gray-val">2</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">가격동향</td>
+          <td class="sticky-col" style="left:60px">데이터기준</td>
+          <td class="sticky-col" style="left:120px">메인_가격동향_30일</td>
+          <td class="bold">470</td><td>375</td><td>71</td><td>24</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">데이터기준</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_15일</td>
+          <td>345</td><td>287</td><td>41</td><td>17</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">데이터기준</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_7일 <span class="tag" style="font-size:9px">기본값</span></td>
+          <td class="gray-val">198</td><td class="gray-val">161</td><td class="gray-val">27</td><td class="gray-val">10</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="7">가격동향</td>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col" style="left:120px">p1~5 합계 <span class="tag" style="font-size:9px">PC</span></td>
+          <td class="bold">993</td><td>977</td><td>16</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p1 <span class="tag" style="font-size:9px">PC</span></td>
+          <td class="gray-val">106</td><td>104</td><td>2</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p2 <span class="tag" style="font-size:9px">PC</span></td>
+          <td class="bold">338</td><td>335</td><td>3</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p3 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>228</td><td>225</td><td>3</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p4 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>176</td><td>171</td><td>5</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p5 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>145</td><td>142</td><td>3</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">페이지</td>
+          <td class="sticky-col sub-label" style="left:120px">메인_가격동향_p다음 <span class="tag" style="font-size:9px">모바일</span></td>
+          <td class="bold">583</td><td class="gray-val">0</td><td>508</td><td>75</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">GNB</td>
+          <td class="sticky-col" style="left:60px">GNB</td>
+          <td class="sticky-col" style="left:120px">GNB_다나와로고</td>
+          <td>193</td><td>167</td><td>11</td><td>15</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">GNB</td>
+          <td class="sticky-col sub-label" style="left:120px">GNB_답나와로고</td>
+          <td>60</td><td>48</td><td>5</td><td>7</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">GNB</td>
+          <td class="sticky-col sub-label" style="left:120px">GNB_공유하기</td>
+          <td>10</td><td>3</td><td>3</td><td>4</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 6: 콘텐츠 주요 클릭 ===== -->
+<div id="tab-contentclick" class="tab-content">
+  <h2 class="tab-analysis-title">1주차 분석 <span>답나와 콘텐츠 주요 클릭</span></h2>
+
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3>도움이됐어요 218건(14.9%) — 오픈 초기 콘텐츠 반응률 높게 형성</h3>
+    <ul>
+      <li>'도움이됐어요' <strong>218건</strong> — 콘텐츠 PV 1,460 대비 <strong>14.9%</strong>의 높은 반응률. 서비스 인지 초기 탐색 유저의 콘텐츠 만족도 반영</li>
+      <li>GNB 다나와로고 48건 — 콘텐츠 열람 후 다나와 이동 흐름도 초기부터 확인</li>
+    </ul>
+  </div>
+
+  <div class="section-title">콘텐츠 주요 클릭 전체 (1주차)</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:60px">대분류</th>
+          <th class="sticky-col" style="min-width:260px;left:60px">항목</th>
+          <th>합계</th><th>PC웹</th><th>M웹</th><th>APP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">전체 합계</td>
+          <td class="sticky-col" style="left:60px">—</td>
+          <td class="bold">487</td><td>301</td><td>70</td><td>116</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col">콘텐츠</td>
+          <td class="sticky-col" style="left:60px">콘텐츠_도움이됐어요</td>
+          <td class="bold">218</td><td>147</td><td>30</td><td>41</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">GNB</td>
+          <td class="sticky-col" style="left:60px">GNB_답나와로고</td>
+          <td>73</td><td>53</td><td>9</td><td>11</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">GNB_다나와로고</td>
+          <td>48</td><td>19</td><td>16</td><td>13</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">GNB_공유하기</td>
+          <td>6</td><td>5</td><td>0</td><td>1</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">플로팅</td>
+          <td class="sticky-col" style="left:60px">플로팅_이동버튼_위로</td>
+          <td>65</td><td>34</td><td>12</td><td>19</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">플로팅_이동버튼_아래로 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>40</td><td>40</td><td class="gray-val">0</td><td class="gray-val">0</td>
+        </tr>
+        <tr>
+          <td class="sticky-col" style="left:60px">플로팅_이동버튼_이전페이지로 <span class="tag" style="font-size:9px">모바일</span></td>
+          <td>33</td><td class="gray-val">0</td><td>3</td><td>30</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.getAttribute('onclick').includes("'" + id + "'")) btn.classList.add('active');
+  });
+}
+
+Chart.register(ChartDataLabels);
+Chart.defaults.plugins.datalabels = { display: false };
+const ACCENT = '#e85c2b', C_UP = '#d63b3b', C_DOWN = '#2a7de1', C_GREEN = '#2a9d57';
+Chart.defaults.font = { family: "'Apple SD Gothic Neo', sans-serif", size: 11 };
+Chart.defaults.color = '#888';
+
+const weeksShort = ['1주차'];
+
+new Chart(document.getElementById('chartMainPV_s'), {
+  type: 'bar',
+  data: {
+    labels: weeksShort,
+    datasets: [
+      { type: 'bar', label: '합계', data: [3782], backgroundColor: [ACCENT+'cc'], yAxisID: 'y', order: 2 },
+      { type: 'line', label: 'PC웹', data: [3342], borderColor: '#333', borderWidth: 2, pointRadius: 4, fill: false, yAxisID: 'y', order: 1 },
+      { type: 'line', label: 'M+APP', data: [440], borderColor: C_DOWN, borderWidth: 1.5, pointRadius: 4, fill: false, yAxisID: 'y', borderDash: [4,3], order: 1 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6 } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#eee' } }, x: { grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartContentPV_s'), {
+  type: 'bar',
+  data: {
+    labels: weeksShort,
+    datasets: [
+      { type: 'bar', label: '합계', data: [1460], backgroundColor: [ACCENT+'cc'], yAxisID: 'y', order: 2 },
+      { type: 'line', label: 'PC웹', data: [1089], borderColor: '#333', borderWidth: 2, pointRadius: 4, fill: false, yAxisID: 'y', order: 1 },
+      { type: 'line', label: 'M+APP', data: [371], borderColor: C_DOWN, borderWidth: 1.5, pointRadius: 4, fill: false, yAxisID: 'y', borderDash: [4,3], order: 1 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: true,
+    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6 } } },
+    scales: { y: { beginAtZero: true, grid: { color: '#eee' } }, x: { grid: { display: false } } }
+  }
+});
+</script>
+</body>
+</html>
