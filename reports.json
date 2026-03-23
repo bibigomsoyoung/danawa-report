@@ -1,5 +1,26 @@
 [
   {
+    "week": 6,
+    "title": "6주차 주간 보고서",
+    "period": "3월 16일 - 3월 22일",
+    "filename": "week06.html",
+    "uploadedAt": "2026년 3월 23일",
+    "tags": [
+      {
+        "label": "메인 PV ▼6.4%",
+        "type": "down"
+      },
+      {
+        "label": "콘텐츠 PV ▼5.1%",
+        "type": "down"
+      },
+      {
+        "label": "가격동향 상품이동 ▲75.7%",
+        "type": "up"
+      }
+    ]
+  },
+  {
     "week": 5,
     "title": "5주차 주간 보고서",
     "period": "3월 9일 - 3월 15일",
