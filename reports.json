@@ -8,14 +8,14 @@
     "tags": [
       {
         "label": "메인 PV ▼6.4%",
-        "type": "down"
+        "type": ""
       },
       {
         "label": "콘텐츠 PV ▼5.1%",
-        "type": "down"
+        "type": ""
       },
       {
-        "label": "가격동향 상품이동 ▲75.7%",
+        "label": "가격동향 상품블로그 이동 ▲75.7%",
         "type": "up"
       }
     ]
