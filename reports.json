@@ -2,7 +2,7 @@
   {
     "week": 7,
     "title": "7주차 주간 보고서",
-    "period": "3월 23일 - 3월 29일",
+    "period": "3월 23일- 3월 29일",
     "filename": "week07.html",
     "uploadedAt": "2026년 3월 30일",
     "tags": [
@@ -11,7 +11,7 @@
         "type": "down"
       },
       {
-        "label": "가격동향 → 상품블로그 504",
+        "label": "가격동향 → 상품블로그 504건",
         "type": "up"
       }
     ]
