@@ -1,5 +1,22 @@
 [
   {
+    "week": 9,
+    "title": "9주차 주간 보고서",
+    "period": "4월 6일 - 4월 12일",
+    "filename": "week09.html",
+    "uploadedAt": "2026년 4월 13일",
+    "tags": [
+      {
+        "label": "메인 PV ▲ 37.0%",
+        "type": "up"
+      },
+      {
+        "label": "콘텐츠 PV ▲ 57.3%",
+        "type": "up"
+      }
+    ]
+  },
+  {
     "week": 8,
     "title": "8주차 주간 보고서",
     "period": "3월 30일 - 4월 5일",
