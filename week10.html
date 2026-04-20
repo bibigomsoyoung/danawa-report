@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>답나와 주간 보고서 — 10주차 (4/13~4/19)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root {
+    --c-bg: #f5f5f3; --c-white: #ffffff; --c-ink: #1a1a1a; --c-mid: #555555;
+    --c-light: #888888; --c-border: #e0e0de; --c-border-strong: #838380;
+    --c-accent: #e85c2b; --c-up: #d63b3b; --c-down: #2a7de1;
+    --c-tag: #f0ede8; --c-highlight: #fff7e6; --c-highlight-border: #f5a623;
+    --c-gray-text: #bbbbbb; --c-new: #2a9d57;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: var(--c-bg); color: var(--c-ink); font-size: 14.5px; line-height: 1.6; }
+  .report-header { background: var(--c-white); border-bottom: 2px solid var(--c-ink); padding: 24px 32px 20px; }
+  .report-header .label { font-size: 11px; color: var(--c-light); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .report-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .report-header .meta { margin-top: 8px; color: var(--c-mid); font-size: 12px; }
+  .report-header .meta span { margin-right: 16px; }
+  .tab-nav { background: var(--c-white); border-bottom: 1px solid var(--c-border); padding: 0 32px; display: flex; position: sticky; top: 0; z-index: 100; }
+  .tab-btn { padding: 12px 16px; font-size: 12px; font-weight: 600; color: var(--c-light); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: color 0.15s; }
+  .tab-btn:hover { color: var(--c-ink); }
+  .tab-btn.active { color: var(--c-ink); border-bottom-color: var(--c-accent); }
+  .tab-content { display: none; padding: 28px 32px; max-width: 1280px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: var(--c-white); border: 1px solid var(--c-border); padding: 16px 18px; }
+  .kpi-card .kpi-label { font-size: 11.5px; color: var(--c-light); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .kpi-card .kpi-wow-large { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 5px; }
+  .kpi-card .kpi-flow { font-size: 12px; color: var(--c-light); }
+  .kpi-card.kpi-up { border: 2px solid #d63b3b; }
+  .kpi-card.kpi-down { border: 2px solid #2a7de1; }
+  .wow-up { color: var(--c-up); } .wow-down { color: var(--c-down); }
+  .tt { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: var(--c-border); color: var(--c-light); border-radius: 50%; font-size: 9px; cursor: help; font-weight: 700; flex-shrink: 0; position: relative; }
+  .tt:hover::after { content: attr(data-tip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background: #222; color: #fff; font-size: 11px; font-weight: 400; white-space: pre-line; padding: 6px 10px; border-radius: 4px; min-width: 200px; max-width: 320px; z-index: 999; line-height: 1.5; pointer-events: none; }
+  .insight-box { background: var(--c-white); border: 1px solid var(--c-border); padding: 20px 22px; margin-bottom: 16px; }
+  .insight-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .insight-box h3 .badge { background: var(--c-ink); color: white; font-size: 10px; padding: 2px 6px; font-weight: 600; flex-shrink: 0; }
+  .insight-box h3 .badge.up { background: var(--c-up); } .insight-box h3 .badge.down { background: var(--c-down); }
+  .insight-box h3 .badge.note { background: var(--c-mid); }
+  .insight-box ul { list-style: none; padding: 0; }
+  .insight-box ul li { color: var(--c-mid); font-size: 14.5px; line-height: 1.8; padding-left: 14px; position: relative; }
+  .insight-box ul li::before { content: '·'; position: absolute; left: 3px; color: var(--c-light); }
+  .insight-box ul li strong { color: var(--c-ink); }
+  .insight-box ul li + li { margin-top: 4px; }
+  .tab-analysis-title { font-size: 18px; font-weight: 800; color: var(--c-ink); letter-spacing: -0.02em; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--c-ink); }
+  .tab-analysis-title span { font-size: 13px; font-weight: 400; color: var(--c-light); margin-left: 10px; }
+  .section-title { font-size: 16px; font-weight: 700; color: var(--c-mid); border-bottom: 1px solid var(--c-border); padding-bottom: 8px; margin-bottom: 16px; margin-top: 28px; }
+  .section-title:first-child { margin-top: 0; }
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; background: var(--c-white); font-size: 12px; }
+  thead th { background: #f0ede8; font-weight: 700; padding: 6px 10px; text-align: center; border: 1px solid var(--c-border); white-space: nowrap; }
+  thead th.sticky-col { position: sticky; left: 0; background: #e8e5e0; z-index: 2; }
+  thead th.sticky-col2 { position: sticky; left: 60px; background: #e8e5e0; z-index: 2; }
+  thead th.sticky-col3 { position: sticky; left: 120px; background: #e8e5e0; z-index: 2; }
+  thead tr.week-header th { background: #e8e5e0; font-size: 11px; }
+  thead tr.week-header th.cur-week { background: #fdf3d0; }
+  tbody td { padding: 5px 10px; border: 1px solid var(--c-border); text-align: right; white-space: nowrap; }
+  tbody td.sticky-col { position: sticky; left: 0; background: var(--c-white); z-index: 1; text-align: left; font-weight: 600; border-right: 2px solid var(--c-border-strong); }
+  tbody td.sticky-col2 { position: sticky; left: 60px; background: var(--c-white); z-index: 1; text-align: left; border-right: 1px solid var(--c-border); }
+  tbody td.sticky-col3 { position: sticky; left: 120px; background: var(--c-white); z-index: 1; text-align: left; border-right: 2px solid var(--c-border-strong); }
+  tbody td.sub-label { text-align: left; color: var(--c-mid); padding-left: 22px; font-weight: 400; }
+  tbody tr:hover td { background: #fafaf8; }
+  tbody tr:hover td.sticky-col, tbody tr:hover td.sticky-col2, tbody tr:hover td.sticky-col3 { background: #f5f3f0; }
+  tr.group-header td { background: #f7f5f2; font-weight: 700; color: var(--c-ink); border-top: 3px solid #555550; }
+  tr.group-header td.sticky-col, tr.group-header td.sticky-col2, tr.group-header td.sticky-col3 { background: #f0ede8; border-top: 3px solid #555550; }
+  tr.sub-group td { border-top: 2px solid var(--c-border-strong); }
+  tr.sub-group td.sticky-col, tr.sub-group td.sticky-col2, tr.sub-group td.sticky-col3 { border-top: 2px solid var(--c-border-strong); }
+  td.wow-up { color: var(--c-up); font-weight: 600; } td.wow-down { color: var(--c-down); font-weight: 600; }
+  td.cur-week { background: #fffbf0 !important; font-weight: 700; }
+  td.cur-week.sticky-col, td.cur-week.sticky-col2, td.cur-week.sticky-col3 { background: #ffeeca !important; }
+  td.bold { font-weight: 700; }
+  td.week-start, th.week-start { border-left: 2px solid var(--c-border-strong) !important; }
+  td.gray-val { color: var(--c-gray-text); }
+  td.new-tag::after { content: 'NEW'; background: var(--c-new); color: white; font-size: 9px; padding: 1px 4px; margin-left: 5px; vertical-align: middle; font-weight: 700; }
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .chart-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-card { background: var(--c-white); border: 1px solid var(--c-border); padding: 20px; }
+  .chart-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--c-mid); }
+  .chart-card canvas { max-height: 260px; }
+  .chart-card.tall canvas { max-height: 380px; }
+  .tag { display: inline-block; background: var(--c-tag); border: 1px solid var(--c-border); padding: 2px 7px; font-size: 10px; color: var(--c-mid); margin-right: 4px; }
+  .tag.green { background: #eefbf1; border-color: #a4ddb5; color: var(--c-new); }
+  .notice { background: #f0ede8; border-left: 3px solid var(--c-mid); padding: 10px 14px; font-size: 14px; color: var(--c-mid); margin-bottom: 16px; line-height: 1.7; }
+  .notice strong { color: var(--c-ink); }
+  .notice.important { background: var(--c-highlight); border-left-color: var(--c-highlight-border); }
+  @media (max-width: 900px) { .tab-content { padding: 16px; } .chart-row, .chart-row.triple { grid-template-columns: 1fr; } .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div class="label">답나와 서비스 주간 보고서</div>
+  <h1>10주차 보고서&thinsp;—&thinsp;2026년 4월 13일 ~ 4월 19일</h1>
+  <div class="meta">
+    <span>발행일 2026.04.20</span>
+    <span>데이터 출처: UXLOG</span>
+    <span>서비스 오픈일 2026.02.11</span>
+  </div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('summary')">핵심 요약</button>
+  <button class="tab-btn" onclick="showTab('entry')">답나와 진입점</button>
+  <button class="tab-btn" onclick="showTab('mainpv')">메인 PV</button>
+  <button class="tab-btn" onclick="showTab('contentpv')">콘텐츠 PV</button>
+  <button class="tab-btn" onclick="showTab('mainclick')">메인 주요 클릭</button>
+  <button class="tab-btn" onclick="showTab('contentclick')">콘텐츠 주요 클릭</button>
+</nav>
+
+<!-- ===== TAB 1: 핵심 요약 ===== -->
+<div id="tab-summary" class="tab-content active">
+  <div class="notice important">
+    <strong>측정 기간:</strong> 2026.04.13(월) ~ 2026.04.19(일), 7일간 &nbsp;|&nbsp;
+    <strong>이번 주 핵심:</strong> 메인 PV ▼19.1% · 콘텐츠 PV ▼25.2% — 9주차 최고치에서 조정. RAM 가격동향 콘텐츠 1위 유지(1,624PV). html_top 배너 교체(▼60.7%) · html_bottom 유튜브 반등(▲64.2%). 모바일 진입점 ▼46.4%.
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card kpi-down">
+      <div class="kpi-label">메인 PV (합계) <span class="tt" data-tip="다나와 통합메인에서 답나와 메인으로 진입한 총 PV&#10;PC웹 + M웹 + APP 주간 합계&#10;전주(9주차) 대비">?</span></div>
+      <div class="kpi-wow-large wow-down">▼ 19.1%</div>
+      <div class="kpi-flow">8,139 → 6,587</div>
+    </div>
+    <div class="kpi-card kpi-down">
+      <div class="kpi-label">콘텐츠 PV (합계) <span class="tt" data-tip="답나와 콘텐츠 전체 PV 합산&#10;PC웹 + M웹 + APP 주간 합계&#10;전주(9주차) 대비">?</span></div>
+      <div class="kpi-wow-large wow-down">▼ 25.2%</div>
+      <div class="kpi-flow">4,733 → 3,540</div>
+    </div>
+    <div class="kpi-card kpi-down">
+      <div class="kpi-label">PC 진입점 (서비스바로가기) <span class="tt" data-tip="다나와 PC 통합메인 GNB '답나와' 탭 클릭수&#10;고정 노출 PC 진입점&#10;전주(9주차) 대비">?</span></div>
+      <div class="kpi-wow-large wow-down">▼ 4.7%</div>
+      <div class="kpi-flow">1,675 → 1,596</div>
+    </div>
+    <div class="kpi-card kpi-down">
+      <div class="kpi-label">모바일 진입점 (프로모션) <span class="tt" data-tip="다나와 모바일 메인 상단 프로모션 배너 클릭수&#10;M웹 + APP 합산 고정 진입점&#10;전주(9주차) 대비&#10;운영 변경 없음 — 자연 감소">?</span></div>
+      <div class="kpi-wow-large wow-down">▼ 46.4%</div>
+      <div class="kpi-flow">323 → 173</div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <h4>주차별 메인 PV 추이</h4>
+      <canvas id="chartMainPV_s"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>주차별 콘텐츠 PV 추이</h4>
+      <canvas id="chartContentPV_s"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">이번 주 인사이트 요약</div>
+
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 메인·콘텐츠 PV 9주차 최고치에서 조정 — RAM 콘텐츠는 1,624PV로 1위 유지</h3>
+    <ul>
+      <li>메인 PV 8,139 → <strong>6,587(▼19.1%)</strong>, 콘텐츠 PV 4,733 → <strong>3,540(▼25.2%)</strong> — 9주차 최고치 반영한 자연 조정. 절대 수치로는 8주차(3,008)보다 높은 수준</li>
+      <li>RAM 가격동향 콘텐츠(1,624PV)가 2주 연속 1위 유지. 테이프 구매가이드(663PV) 신규 진입으로 2위. 상위 3개 콘텐츠 점유율 <strong>82.0%</strong></li>
+      <li>모바일(M+APP) PV 1,647 → <strong>1,153(▼30.0%)</strong> — PC(▼16.3%)보다 모바일 감소폭이 더 큼. 모바일 진입점(프로모션 배너) ▼46.4% 자연 감소가 연동된 것으로 해석</li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <h3><span class="badge note">운영변경</span> html_top 배너 교체로 top ▼60.7% · html_bot 유튜브 ▲64.2% 반등</h3>
+    <ul>
+      <li><strong>html_top 배너를 음식물처리기 콘텐츠 연결로 교체</strong> — 9주차 디램 배너 당시 M웹 클릭이 PC를 압도(462 vs 242)했으나, 이번 주 top 클릭 806 → <strong>317(▼60.7%)</strong>로 급감. 배너 소재 변경이 클릭 반응에 직접 영향을 미친 것으로 해석</li>
+      <li>html_bottom(유튜브) 95 → <strong>156(▲64.2%)</strong> — 9주차 중 적용한 썸네일 (이미지+텍스트형) 4개 → 썸네일 (이미지형) 6개 변경 이후 처음 온전히 집계된 주차로 이번 주 증가가 변경 효과를 반영한 것으로 추정</li>
+      <li>html_middle은 658 → <strong>644(▼2.1%)</strong>로 사실상 유지. top+middle 합계 1,464 → <strong>961(▼34.4%)</strong>으로 감소했으나 이는 top 배너 교체 영향이 주도</li>
+    </ul>
+  </div>
+
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 가격동향 상품이동 ▼52.6% · 모바일 페이지 탐색 급감 — 9주차 급등 이후 조정</h3>
+    <ul>
+      <li>가격동향 → 상품블로그 이동 702 → <strong>333(▼52.6%)</strong> — 9주차 역대 최고치에서 조정. 판매량순 이동이 212 → <strong>48(▼77.4%)</strong>으로 급감하며 지난 2주간의 급증세가 되돌아옴</li>
+      <li>모바일 페이지 탐색: p다음 216 → <strong>58(▼73.1%)</strong>, p이전 71 → <strong>10(▼85.9%)</strong> — 모바일 메인 유입 자체가 감소한 영향</li>
+      <li>데이터기준은 전 항목 증가(30일 ▲10.8%, 15일 ▲15.5%, 7일 ▲36.9%) — 전반적인 메인 PV 감소 속에서도 가격동향에 진입한 사용자의 탐색 깊이는 유지되는 양상</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== TAB 2: 답나와 진입점 ===== -->
+<div id="tab-entry" class="tab-content">
+  <h2 class="tab-analysis-title">10주차 분석 <span>답나와 진입점</span></h2>
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 모바일 프로모션 ▼46.4% 자연 감소 — PC 바로가기는 안정 수준 유지</h3>
+    <ul>
+      <li>모바일 프로모션 323 → <strong>173(▼46.4%)</strong> — 운영 변경 없음. 9주차 323건은 오픈 이후 최고치였으며 이번 주 자연 조정. M웹 137→55(▼59.9%), APP 182→114(▼37.4%)</li>
+      <li>PC 서비스바로가기 1,675 → <strong>1,596(▼4.7%)</strong> — 오픈 이후 안정 구간(1,550~1,700대) 내 정상 수준</li>
+      <li>고정 진입점 합계 1,998 → <strong>1,769(▼11.5%)</strong></li>
+    </ul>
+  </div>
+  <div class="chart-row">
+    <div class="chart-card">
+      <h4>주차별 고정 진입점 클릭 추이</h4>
+      <canvas id="chartEntry"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>10주차 진입점 구성</h4>
+      <canvas id="chartEntryPie"></canvas>
+    </div>
+  </div>
+  <div class="section-title">고정 진입점 클릭 추이</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="week-header">
+          <th class="sticky-col" style="min-width:200px">진입점</th>
+          <th colspan="4">1주차</th><th colspan="4" class="week-start">2주차</th>
+          <th colspan="4" class="week-start">3주차</th><th colspan="4" class="week-start">4주차</th>
+          <th colspan="4" class="week-start">5주차</th><th colspan="4" class="week-start">6주차</th>
+          <th colspan="4" class="week-start">7주차</th><th colspan="4" class="week-start">8주차</th>
+          <th colspan="4" class="week-start">9주차</th>
+          <th colspan="5" class="cur-week week-start">10주차 ★</th>
+        </tr>
+        <tr>
+          <th class="sticky-col">구분</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="cur-week week-start">합계</th><th class="cur-week">PC</th><th class="cur-week">M웹</th><th class="cur-week">APP</th><th class="cur-week">WoW</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">고정 진입점 전체</td>
+          <td>1,841</td><td>1,662</td><td>63</td><td>116</td>
+          <td class="week-start">1,752</td><td>1,669</td><td>27</td><td>61</td>
+          <td class="week-start">2,042</td><td>1,944</td><td>37</td><td>67</td>
+          <td class="week-start">1,653</td><td>1,545</td><td>44</td><td>64</td>
+          <td class="week-start">1,825</td><td>1,646</td><td>48</td><td>131</td>
+          <td class="week-start">1,642</td><td>1,427</td><td>83</td><td>132</td>
+          <td class="week-start">1,889</td><td>1,670</td><td>65</td><td>154</td>
+          <td class="week-start">1,907</td><td>1,601</td><td>109</td><td>197</td>
+          <td class="week-start bold">1,998</td><td>1,677</td><td>139</td><td>182</td>
+          <td class="cur-week bold">1,769</td><td class="cur-week">1,592</td><td class="cur-week">61</td><td class="cur-week">116</td>
+          <td class="cur-week wow-down">▼ 11.5%</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">PC 서비스바로가기 (GNB 고정)</td>
+          <td>1,664</td><td class="bold">1,658</td><td class="gray-val">6</td><td class="gray-val">0</td>
+          <td class="week-start">1,667</td><td class="bold">1,667</td><td class="gray-val">4</td><td class="gray-val">1</td>
+          <td class="week-start bold">1,940</td><td class="bold">1,940</td><td class="gray-val">5</td><td class="gray-val">1</td>
+          <td class="week-start">1,547</td><td class="bold">1,543</td><td class="gray-val">4</td><td class="gray-val">0</td>
+          <td class="week-start">1,647</td><td class="bold">1,645</td><td class="gray-val">2</td><td class="gray-val">0</td>
+          <td class="week-start">1,429</td><td class="bold">1,424</td><td class="gray-val">3</td><td class="gray-val">2</td>
+          <td class="week-start">1,672</td><td class="bold">1,668</td><td class="gray-val">4</td><td class="gray-val">0</td>
+          <td class="week-start">1,603</td><td class="bold">1,595</td><td class="gray-val">6</td><td class="gray-val">2</td>
+          <td class="week-start bold">1,675</td><td class="bold">1,673</td><td class="gray-val">2</td><td class="gray-val">0</td>
+          <td class="cur-week">1,596</td><td class="cur-week bold">1,588</td><td class="cur-week gray-val">6</td><td class="cur-week gray-val">2</td>
+          <td class="cur-week wow-down">▼ 4.7%</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">모바일 프로모션배너 (M 고정)</td>
+          <td>177</td><td class="gray-val">4</td><td class="bold">57</td><td class="bold">116</td>
+          <td class="week-start">85</td><td class="gray-val">2</td><td class="bold">23</td><td class="bold">60</td>
+          <td class="week-start">102</td><td class="gray-val">4</td><td class="bold">32</td><td class="bold">66</td>
+          <td class="week-start">106</td><td class="gray-val">2</td><td class="bold">40</td><td class="bold">64</td>
+          <td class="week-start">178</td><td class="gray-val">1</td><td class="bold">46</td><td class="bold">131</td>
+          <td class="week-start">213</td><td class="gray-val">3</td><td class="bold">80</td><td class="bold">130</td>
+          <td class="week-start">217</td><td class="gray-val">6</td><td class="bold">61</td><td class="bold">150</td>
+          <td class="week-start">304</td><td class="gray-val">8</td><td class="bold">103</td><td class="bold">193</td>
+          <td class="week-start bold">323</td><td class="gray-val">4</td><td class="bold">137</td><td class="bold">182</td>
+          <td class="cur-week">173</td><td class="cur-week gray-val">4</td><td class="cur-week bold">55</td><td class="cur-week bold">114</td>
+          <td class="cur-week wow-down">▼ 46.4%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 3: 메인 PV ===== -->
+<div id="tab-mainpv" class="tab-content">
+  <h2 class="tab-analysis-title">10주차 분석 <span>답나와 메인 PV</span></h2>
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 메인 PV 6,587 (▼19.1%) — 전 채널 감소, 모바일 낙폭이 더 큼</h3>
+    <ul>
+      <li>PC PV 6,492 → <strong>5,434(▼16.3%)</strong>, 모바일(M+APP) 1,647 → <strong>1,153(▼30.0%)</strong> — PC보다 모바일 감소폭이 큼. 모바일 진입점(프로모션 배너) ▼46.4% 자연 감소와 연동</li>
+      <li>모바일 비중 20.2% → <strong>17.5%</strong> — 9주차에 이어 2주 연속 PC 중심 구조 지속. 8주차 이전의 모바일 확대 추세가 주춤한 흐름</li>
+      <li>일평균 PV <strong>941</strong> — 9주차(1,163) 대비 조정됐으나 7주차(632), 8주차(849)보다는 높은 수준</li>
+    </ul>
+  </div>
+  <div class="chart-row">
+    <div class="chart-card tall">
+      <h4>주차별 메인 PV 추이 (막대: 합계 / 선: 채널별)</h4>
+      <canvas id="chartMainPV_full"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>10주차 채널 비중</h4>
+      <canvas id="chartMainPVpie"></canvas>
+    </div>
+  </div>
+  <div class="section-title">메인 PV 주차별 추이</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="week-header">
+          <th class="sticky-col" style="min-width:120px">구분</th>
+          <th colspan="3">1주차</th><th colspan="3" class="week-start">2주차</th>
+          <th colspan="3" class="week-start">3주차</th><th colspan="3" class="week-start">4주차</th>
+          <th colspan="3" class="week-start">5주차</th><th colspan="3" class="week-start">6주차</th>
+          <th colspan="3" class="week-start">7주차</th><th colspan="3" class="week-start">8주차</th>
+          <th colspan="3" class="week-start">9주차</th>
+          <th colspan="4" class="cur-week week-start">10주차 ★</th>
+        </tr>
+        <tr>
+          <th class="sticky-col">지표</th>
+          <th>합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="cur-week week-start">합계</th><th class="cur-week">일평균</th><th class="cur-week">WoW</th><th class="cur-week">절대변화</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">합계</td>
+          <td>3,782</td><td>756</td><td>—</td>
+          <td class="week-start">3,091</td><td>442</td><td class="wow-down">▼18.3%</td>
+          <td class="week-start">5,556</td><td>794</td><td class="wow-up">▲79.7%</td>
+          <td class="week-start">5,189</td><td>741</td><td class="wow-down">▼6.6%</td>
+          <td class="week-start">6,663</td><td>952</td><td class="wow-up">▲28.4%</td>
+          <td class="week-start">6,238</td><td>891</td><td class="wow-down">▼6.4%</td>
+          <td class="week-start">4,426</td><td>632</td><td class="wow-down">▼29.0%</td>
+          <td class="week-start">5,941</td><td>849</td><td class="wow-up">▲34.2%</td>
+          <td class="week-start bold">8,139</td><td>1,163</td><td class="wow-up">▲37.0%</td>
+          <td class="cur-week bold">6,587</td><td class="cur-week">941</td><td class="cur-week wow-down">▼19.1%</td><td class="cur-week wow-down">▼1,552</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">PC웹</td>
+          <td>3,342</td><td>668</td><td>—</td>
+          <td class="week-start">2,754</td><td>393</td><td class="wow-down">▼17.6%</td>
+          <td class="week-start">4,820</td><td>689</td><td class="wow-up">▲75.0%</td>
+          <td class="week-start">4,440</td><td>634</td><td class="wow-down">▼7.9%</td>
+          <td class="week-start">5,137</td><td>734</td><td class="wow-up">▲15.7%</td>
+          <td class="week-start bold">5,321</td><td>760</td><td class="wow-up">▲3.6%</td>
+          <td class="week-start">3,237</td><td>462</td><td class="wow-down">▼39.2%</td>
+          <td class="week-start">4,301</td><td>614</td><td class="wow-up">▲32.9%</td>
+          <td class="week-start bold">6,492</td><td>927</td><td class="wow-up">▲50.9%</td>
+          <td class="cur-week bold">5,434</td><td class="cur-week">776</td><td class="cur-week wow-down">▼16.3%</td><td class="cur-week wow-down">▼1,058</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">모바일 (M+APP)</td>
+          <td>440</td><td>88</td><td>—</td>
+          <td class="week-start">337</td><td>48</td><td class="wow-down">▼23.4%</td>
+          <td class="week-start">736</td><td>105</td><td class="wow-up">▲118.4%</td>
+          <td class="week-start">749</td><td>107</td><td class="wow-up">▲1.8%</td>
+          <td class="week-start bold">1,526</td><td>218</td><td class="wow-up">▲103.7%</td>
+          <td class="week-start">917</td><td>131</td><td class="wow-down">▼39.9%</td>
+          <td class="week-start">1,189</td><td>170</td><td class="wow-up">▲29.7%</td>
+          <td class="week-start">1,640</td><td>234</td><td class="wow-up">▲37.9%</td>
+          <td class="week-start">1,647</td><td>235</td><td class="wow-up">▲0.4%</td>
+          <td class="cur-week">1,153</td><td class="cur-week">165</td><td class="cur-week wow-down">▼30.0%</td><td class="cur-week wow-down">▼494</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">M웹</td>
+          <td>279</td><td>56</td><td>—</td>
+          <td class="week-start">196</td><td>28</td><td class="wow-down">▼29.7%</td>
+          <td class="week-start">351</td><td>50</td><td class="wow-up">▲79.1%</td>
+          <td class="week-start">354</td><td>51</td><td class="wow-up">▲0.9%</td>
+          <td class="week-start">579</td><td>83</td><td class="wow-up">▲63.6%</td>
+          <td class="week-start">466</td><td>67</td><td class="wow-down">▼19.5%</td>
+          <td class="week-start">577</td><td>82</td><td class="wow-up">▲23.8%</td>
+          <td class="week-start">902</td><td>129</td><td class="wow-up">▲56.3%</td>
+          <td class="week-start">976</td><td>139</td><td class="wow-up">▲8.2%</td>
+          <td class="cur-week">665</td><td class="cur-week">95</td><td class="cur-week wow-down">▼31.9%</td><td class="cur-week wow-down">▼311</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">APP</td>
+          <td>161</td><td>32</td><td>—</td>
+          <td class="week-start">141</td><td>20</td><td class="wow-down">▼12.4%</td>
+          <td class="week-start">385</td><td>55</td><td class="wow-up">▲173.0%</td>
+          <td class="week-start">395</td><td>56</td><td class="wow-up">▲2.6%</td>
+          <td class="week-start bold">947</td><td>135</td><td class="wow-up">▲139.7%</td>
+          <td class="week-start">451</td><td>64</td><td class="wow-down">▼52.4%</td>
+          <td class="week-start">612</td><td>87</td><td class="wow-up">▲35.7%</td>
+          <td class="week-start">738</td><td>105</td><td class="wow-up">▲20.6%</td>
+          <td class="week-start">671</td><td>96</td><td class="wow-down">▼9.1%</td>
+          <td class="cur-week">488</td><td class="cur-week">70</td><td class="cur-week wow-down">▼27.3%</td><td class="cur-week wow-down">▼183</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 4: 콘텐츠 PV ===== -->
+<div id="tab-contentpv" class="tab-content">
+  <h2 class="tab-analysis-title">10주차 분석 <span>답나와 콘텐츠 PV</span></h2>
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 콘텐츠 PV 3,540 (▼25.2%) — RAM 콘텐츠 2주 연속 1위, 테이프 가이드 신규 2위 진입</h3>
+    <ul>
+      <li>RAM 가격동향 콘텐츠(1,624PV)가 9주차에 이어 2주 연속 1위 — 뉴스룸 노출 및 RAM 가격 이슈에 대한 사용자 관심 지속으로 추정</li>
+      <li>테이프 구매가이드(663PV) 신규 2위 진입 — PC 중심(545PV) 유입. 음식물처리기 비교(446PV)는 3위로 하락</li>
+      <li>상위 3개 콘텐츠 점유율 <strong>82.0%</strong>(1,624+663+446=2,733) — 9주차(81.0%)와 유사한 상위 집중 구조 지속</li>
+      <li>모바일(M+APP) 972 → <strong>696(▼28.4%)</strong> — 콘텐츠 PV 내 모바일 비중 <strong>19.7%</strong>. 모바일 유입 전반 감소 흐름 반영</li>
+    </ul>
+  </div>
+  <div class="chart-row">
+    <div class="chart-card tall">
+      <h4>주차별 콘텐츠 PV 추이 (막대: 합계 / 선: 채널별)</h4>
+      <canvas id="chartContentPV_full"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>10주차 콘텐츠별 PV 순위 (Top 8)</h4>
+      <canvas id="chartContentRank"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">콘텐츠 PV 합계 추이</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="week-header">
+          <th class="sticky-col" style="min-width:120px">구분</th>
+          <th colspan="3">1주차</th><th colspan="3" class="week-start">2주차</th>
+          <th colspan="3" class="week-start">3주차</th><th colspan="3" class="week-start">4주차</th>
+          <th colspan="3" class="week-start">5주차</th><th colspan="3" class="week-start">6주차</th>
+          <th colspan="3" class="week-start">7주차</th><th colspan="3" class="week-start">8주차</th>
+          <th colspan="3" class="week-start">9주차</th>
+          <th colspan="4" class="cur-week week-start">10주차 ★</th>
+        </tr>
+        <tr>
+          <th class="sticky-col">지표</th>
+          <th>합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="week-start">합계</th><th>일평균</th><th>WoW</th>
+          <th class="cur-week week-start">합계</th><th class="cur-week">일평균</th><th class="cur-week">WoW</th><th class="cur-week">절대변화</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group-header">
+          <td class="sticky-col">합계</td>
+          <td>1,460</td><td>292</td><td>—</td>
+          <td class="week-start">902</td><td>129</td><td class="wow-down">▼38.2%</td>
+          <td class="week-start">2,858</td><td>408</td><td class="wow-up">▲216.9%</td>
+          <td class="week-start">3,044</td><td>435</td><td class="wow-up">▲6.5%</td>
+          <td class="week-start">4,287</td><td>612</td><td class="wow-up">▲40.8%</td>
+          <td class="week-start">4,069</td><td>581</td><td class="wow-down">▼5.1%</td>
+          <td class="week-start">1,927</td><td>275</td><td class="wow-down">▼52.6%</td>
+          <td class="week-start">3,008</td><td>430</td><td class="wow-up">▲56.1%</td>
+          <td class="week-start bold">4,733</td><td>676</td><td class="wow-up">▲57.3%</td>
+          <td class="cur-week bold">3,540</td><td class="cur-week">506</td><td class="cur-week wow-down">▼25.2%</td><td class="cur-week wow-down">▼1,193</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">PC웹</td>
+          <td>1,089</td><td>218</td><td>—</td>
+          <td class="week-start">771</td><td>110</td><td class="wow-down">▼29.2%</td>
+          <td class="week-start">2,381</td><td>340</td><td class="wow-up">▲208.8%</td>
+          <td class="week-start">2,487</td><td>355</td><td class="wow-up">▲4.5%</td>
+          <td class="week-start">3,033</td><td>433</td><td class="wow-up">▲21.9%</td>
+          <td class="week-start bold">3,516</td><td>502</td><td class="wow-up">▲15.9%</td>
+          <td class="week-start">1,148</td><td>164</td><td class="wow-down">▼67.3%</td>
+          <td class="week-start">2,008</td><td>287</td><td class="wow-up">▲74.9%</td>
+          <td class="week-start bold">3,761</td><td>537</td><td class="wow-up">▲87.3%</td>
+          <td class="cur-week bold">2,844</td><td class="cur-week">406</td><td class="cur-week wow-down">▼24.4%</td><td class="cur-week wow-down">▼917</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">모바일 (M+APP)</td>
+          <td>371</td><td>74</td><td>—</td>
+          <td class="week-start">131</td><td>19</td><td class="wow-down">▼64.7%</td>
+          <td class="week-start">477</td><td>68</td><td class="wow-up">▲264.1%</td>
+          <td class="week-start">557</td><td>80</td><td class="wow-up">▲16.8%</td>
+          <td class="week-start bold">1,254</td><td>179</td><td class="wow-up">▲125.1%</td>
+          <td class="week-start">553</td><td>79</td><td class="wow-down">▼55.9%</td>
+          <td class="week-start">779</td><td>111</td><td class="wow-up">▲40.9%</td>
+          <td class="week-start bold">1,000</td><td>143</td><td class="wow-up">▲28.4%</td>
+          <td class="week-start">972</td><td>139</td><td class="wow-down">▼2.8%</td>
+          <td class="cur-week">696</td><td class="cur-week">99</td><td class="cur-week wow-down">▼28.4%</td><td class="cur-week wow-down">▼276</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">M웹</td>
+          <td>181</td><td>36</td><td>—</td>
+          <td class="week-start">67</td><td>10</td><td class="wow-down">▼63.0%</td>
+          <td class="week-start">181</td><td>26</td><td class="wow-up">▲170.1%</td>
+          <td class="week-start">240</td><td>34</td><td class="wow-up">▲32.6%</td>
+          <td class="week-start">474</td><td>68</td><td class="wow-up">▲97.5%</td>
+          <td class="week-start">286</td><td>41</td><td class="wow-down">▼39.7%</td>
+          <td class="week-start">384</td><td>55</td><td class="wow-up">▲34.3%</td>
+          <td class="week-start">517</td><td>74</td><td class="wow-up">▲34.6%</td>
+          <td class="week-start">565</td><td>81</td><td class="wow-up">▲9.3%</td>
+          <td class="cur-week">397</td><td class="cur-week">57</td><td class="cur-week wow-down">▼29.7%</td><td class="cur-week wow-down">▼168</td>
+        </tr>
+        <tr>
+          <td class="sticky-col sub-label">APP</td>
+          <td>190</td><td>38</td><td>—</td>
+          <td class="week-start">64</td><td>9</td><td class="wow-down">▼66.3%</td>
+          <td class="week-start">296</td><td>42</td><td class="wow-up">▲362.5%</td>
+          <td class="week-start">317</td><td>45</td><td class="wow-up">▲7.1%</td>
+          <td class="week-start bold">780</td><td>111</td><td class="wow-up">▲146.1%</td>
+          <td class="week-start">267</td><td>38</td><td class="wow-down">▼65.8%</td>
+          <td class="week-start">395</td><td>56</td><td class="wow-up">▲47.9%</td>
+          <td class="week-start">483</td><td>69</td><td class="wow-up">▲22.3%</td>
+          <td class="week-start">407</td><td>58</td><td class="wow-down">▼15.7%</td>
+          <td class="cur-week">299</td><td class="cur-week">43</td><td class="cur-week wow-down">▼26.5%</td><td class="cur-week wow-down">▼108</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">10주차 콘텐츠별 PV</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sticky-col" style="min-width:280px">콘텐츠 (클릭 시 이동)</th>
+          <th>합계</th><th>점유율</th><th>PC웹</th><th>M웹</th><th>APP</th><th>M+APP</th><th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/2026april-ram-price-movement" target="_blank" style="color:var(--c-ink);text-decoration:none;font-weight:700">대기권 돌파한 램값, 3월에 소매 가격 일시적 하락 [RAM 가격동향]</a></td>
+          <td class="bold cur-week">1,624</td><td>45.9%</td><td>1,379</td><td>101</td><td>144</td><td>245</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><a href="https://review.danawa.com/how-to-choose-tape-by-application" target="_blank" style="color:var(--c-ink);text-decoration:none;font-weight:700">[상황별 테이프 구매가이드] 이럴 땐 이 테이프가 정답입니다.</a></td>
+          <td class="bold cur-week">663</td><td>18.7%</td><td>545</td><td>53</td><td>65</td><td>118</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/food-waste-disposer-comparison-analysis-food-waste-minix" target="_blank" style="color:var(--c-ink);text-decoration:none">연예인·유튜버가 추천한 음식물 처리기, 직접 비교해 보니...</a></td>
+          <td class="cur-week">446</td><td>12.6%</td><td>362</td><td>40</td><td>44</td><td>84</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/ssd-comparison-overall-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">NVMe SSD 마이너 브랜드 10종 비교 성능 벤치마크</a></td>
+          <td class="cur-week">147</td><td>4.2%</td><td>124</td><td>9</td><td>14</td><td>23</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/summary-of-graphics-card-benchmark-results-as-of-january" target="_blank" style="color:var(--c-ink);text-decoration:none">요즘 글카 몽땅 사서 골방 테스트해 본 썰</a></td>
+          <td class="cur-week">147</td><td>4.2%</td><td>122</td><td>9</td><td>16</td><td>25</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/geonjo-bunswae-eumsingmul-cheorigi-garu-bangbeop-seoulsi" target="_blank" style="color:var(--c-ink);text-decoration:none">건조분쇄형 음식물 처리기 가루 버리는 방법 feat. 서울시&amp;경기도</a></td>
+          <td class="cur-week">119</td><td>3.4%</td><td>23</td><td>96</td><td>0</td><td>96</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/species-comparison-game-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">NVMe SSD 10종 비교 게임 성능 벤치마크</a></td>
+          <td class="cur-week">79</td><td>2.2%</td><td>74</td><td>3</td><td>2</td><td>5</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/youngdaes-living-room-book-gonorrhea-real-air-purifier-5-1" target="_blank" style="color:var(--c-ink);text-decoration:none">youngdaes-living-room-…-real-air-purifier-5-1</a></td>
+          <td class="cur-week">61</td><td>1.7%</td><td>40</td><td>17</td><td>4</td><td>21</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/paenteogeuraepeu-kibodeu-jong-hangmok-yoyak" target="_blank" style="color:var(--c-ink);text-decoration:none">휴대용 팬터그래프 키보드 7종 리뷰 요약</a></td>
+          <td class="cur-week">55</td><td>1.6%</td><td>51</td><td>1</td><td>3</td><td>4</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/reusable-filters-for-samsung-infinite-line-air-purifiers" target="_blank" style="color:var(--c-ink);text-decoration:none">삼성 인피닛 라인 공기청정기 재사용 필터</a></td>
+          <td class="cur-week">35</td><td>1.0%</td><td>18</td><td>14</td><td>3</td><td>17</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/what-is-the-difference-between-plastic-and-aluminum-keyboard" target="_blank" style="color:var(--c-ink);text-decoration:none">알루미늄 VS. 플라스틱 차이점 딱 정해드림</a></td>
+          <td class="cur-week">33</td><td>0.9%</td><td>16</td><td>17</td><td>0</td><td>17</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><a href="https://review.danawa.com/dap-eumsingmul-cheorigi" target="_blank" style="color:var(--c-ink);text-decoration:none;font-weight:700">&lt;답나와 유즈드&gt; 음식물처리기 리뷰 후 방출! 최대 50% OFF 선착순</a></td>
+          <td class="cur-week">30</td><td>0.8%</td><td>23</td><td>7</td><td>0</td><td>7</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/gamepad-buying-guide" target="_blank" style="color:var(--c-ink);text-decoration:none">게임패드 다 똑같은 줄 알았는데? 아니었어요</a></td>
+          <td class="cur-week">26</td><td>0.7%</td><td>20</td><td>2</td><td>4</td><td>6</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/teipeu-gaideu-yesi" target="_blank" style="color:var(--c-ink);text-decoration:none">teipeu-gaideu-yesi</a></td>
+          <td class="cur-week">25</td><td>0.7%</td><td>20</td><td>5</td><td>0</td><td>5</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/deungnok-ki-paenteogeuraepeu-hyudae-museon-kibodeu-jong" target="_blank" style="color:var(--c-ink);text-decoration:none">태블릿 PC에는 역시! 팬터그래프 타입의 휴대용 무선 키보드 7종 리뷰</a></td>
+          <td class="cur-week">17</td><td>0.5%</td><td>8</td><td>9</td><td>0</td><td>9</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/eumsingmul-sseuregi-cheorigi-garu-bangbeop" target="_blank" style="color:var(--c-ink);text-decoration:none">서울별시편~ 건조분쇄형 음식물 처리기 가루 버리는 방법</a></td>
+          <td class="cur-week">9</td><td>0.3%</td><td>2</td><td>7</td><td>0</td><td>7</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/premium-air-purifier-benchmark-key-summary" target="_blank" style="color:var(--c-ink);text-decoration:none">공기청정기 지금 사려는 분들? 저기 잠깐만요</a></td>
+          <td class="cur-week">4</td><td>0.1%</td><td>2</td><td>2</td><td>0</td><td>2</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/sae-pokpungjeonya-raem-gapt-jeonjaeng-dasi-gagyeok-donghyang" target="_blank" style="color:var(--c-ink);text-decoration:none">새 CPU 앞두고 폭풍전야. 램값만 착해지면 CPU 전쟁 다시 불붙는다</a></td>
+          <td class="cur-week">4</td><td>0.1%</td><td>4</td><td>0</td><td>0</td><td>0</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/sff-guide" target="_blank" style="color:var(--c-ink);text-decoration:none">sff-guide</a></td>
+          <td class="cur-week">4</td><td>0.1%</td><td>4</td><td>0</td><td>0</td><td>0</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/tape-selection-guide-by-application" target="_blank" style="color:var(--c-ink);text-decoration:none">tape-selection-guide-by-application</a></td>
+          <td class="cur-week">3</td><td>0.1%</td><td>3</td><td>0</td><td>0</td><td>0</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/yeokdae-choejeo-daebi-hyeonjae-gagyeok-hanguk-bae-miguk" target="_blank" style="color:var(--c-ink);text-decoration:none">역대 최저 대비 현재 가격 한국·미국 비교</a></td>
+          <td class="cur-week">2</td><td>0.1%</td><td>0</td><td>2</td><td>0</td><td>2</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><a href="https://review.danawa.com/iphone-mac-safe-auxiliary-battery-performance-benchmark" target="_blank" style="color:var(--c-ink);text-decoration:none;font-weight:700">아이폰 맥세이프 보조배터리 10종 비교 성능 벤치마크</a></td>
+          <td class="cur-week">2</td><td>0.1%</td><td>1</td><td>1</td><td>0</td><td>1</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/pc-gyeonjeok-museoun-yojeum-daeaneun-eopseulkka-geiming" target="_blank" style="color:var(--c-ink);text-decoration:none">PC 견적 무서운 요즘, 대안은 없을까?</a></td>
+          <td class="cur-week">1</td><td>0.0%</td><td>1</td><td>0</td><td>0</td><td>0</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/benchmark-highlights-1" target="_blank" style="color:var(--c-ink);text-decoration:none">benchmark-highlights-1</a></td>
+          <td class="cur-week">1</td><td>0.0%</td><td>0</td><td>1</td><td>0</td><td>1</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col new-tag"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/httpsreviewdanawacomfireextinguisher-selection-guide-by" target="_blank" style="color:var(--c-ink);text-decoration:none">httpsreviewdanawacom…fireextinguisher-selection-guide-by</a></td>
+          <td class="cur-week">1</td><td>0.0%</td><td>1</td><td>0</td><td>0</td><td>0</td><td><span class="tag green">신규</span></td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><a href="https://review.danawa.com/cable-species-comparison-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">C to C 케이블 18종 비교 성능 벤치마크</a></td>
+          <td class="cur-week">1</td><td>0.0%</td><td>1</td><td>0</td><td>0</td><td>0</td><td>—</td>
+        </tr>
+        <tr>
+          <td class="sticky-col"><span class="tt" data-tip="제목 확인 불가, slug 대체" style="margin-right:4px">?</span><a href="https://review.danawa.com/species-comparison-performance-benchmarks" target="_blank" style="color:var(--c-ink);text-decoration:none">species-comparison-performance-benchmarks</a></td>
+          <td class="cur-week">1</td><td>0.0%</td><td>0</td><td>1</td><td>0</td><td>1</td><td>—</td>
+        </tr>
+        <tr class="group-header">
+          <td class="sticky-col">합계</td>
+          <td class="cur-week bold">3,540</td><td class="bold">100%</td><td class="bold">2,844</td><td class="bold">397</td><td class="bold">299</td><td class="bold">696</td><td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="notice">콘텐츠 제목: 운영팀 제공 또는 slug 기반 추정. <strong>NEW 표기 콘텐츠는 10주차 신규 등장.</strong> 제목 확인이 어려운 콘텐츠는 slug 그대로 표기.</div>
+</div>
+
+<!-- ===== TAB 5: 메인 주요 클릭 ===== -->
+<div id="tab-mainclick" class="tab-content">
+  <h2 class="tab-analysis-title">10주차 분석 <span>답나와 메인 주요 클릭</span></h2>
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3><span class="badge note">운영변경</span> html_top ▼60.7% — 배너 소재 교체 영향, html_bottom ▲64.2% 유튜브 반등</h3>
+    <ul>
+      <li>html_top 배너를 <strong>음식물처리기 콘텐츠 연결로 교체</strong> → top 클릭 806 → <strong>317(▼60.7%)</strong>. 9주차 디램 배너 당시 M웹이 PC를 압도(462 vs 242)했던 것과 달리, 이번 주 M웹(36)·PC(209) 구성으로 정상화</li>
+      <li>html_bottom 95 → <strong>156(▲64.2%)</strong> — 9주차 중 변경한 유튜브 썸네일 4→6개가 이번 주 온전히 집계되며 반등. 유튜브 영역 클릭이 오픈 이후 최고치 수준으로 회복</li>
+      <li>html_middle 658 → <strong>644(▼2.1%)</strong> 사실상 유지 — 8주차 UI 개편 이후 middle 클릭 안정 구간 진입</li>
+    </ul>
+  </div>
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 가격동향 전반 소폭 감소 · 상품이동 ▼52.6% — 9주차 급등 이후 조정</h3>
+    <ul>
+      <li>카테고리 합계 1,393 → <strong>1,317(▼5.5%)</strong> — AMD CPU(292)가 RAM(287)을 소폭 앞서며 처음으로 카테고리 순위 변동. 엔비디아VGA(▲5.0%) · 인텔CPU(▲9.4%)는 소폭 상승</li>
+      <li>상품이동 702 → <strong>333(▼52.6%)</strong> — 9주차 역대 최고치에서 조정. 특히 판매량순 이동이 212 → <strong>48(▼77.4%)</strong>으로 급감하며 9·10주차 급등세 되돌림</li>
+      <li>데이터기준은 전 항목 증가(30일 ▲10.8%, 15일 ▲15.5%, 7일 ▲36.9%) — 가격동향 도달 사용자의 탐색 성향은 유지. p2+ 비율 <strong>86.4%</strong> 안정적</li>
+    </ul>
+  </div>
+
+  <div class="chart-row triple">
+    <div class="chart-card">
+      <h4>가격동향 카테고리 클릭 비중 (10주차)</h4>
+      <canvas id="chartCatPie"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>가격동향 상품이동 추이 (5~10주차)</h4>
+      <canvas id="chartProductMove"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>HTML 영역별 클릭 추이</h4>
+      <canvas id="chartHtml"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">메인 주요 클릭 전체</div>
+  <div style="font-size:12px;color:#888;margin-bottom:8px;"><span><strong style="color:#555">—</strong> = 미발생/미집계</span></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="week-header">
+          <th class="sticky-col" style="min-width:60px">대분류</th>
+          <th class="sticky-col2" style="min-width:60px">중분류</th>
+          <th class="sticky-col3" style="min-width:200px">항목</th>
+          <th colspan="4">1주차</th><th colspan="4" class="week-start">2주차</th>
+          <th colspan="4" class="week-start">3주차</th><th colspan="4" class="week-start">4주차</th>
+          <th colspan="4" class="week-start">5주차</th><th colspan="4" class="week-start">6주차</th>
+          <th colspan="4" class="week-start">7주차</th><th colspan="4" class="week-start">8주차</th>
+          <th colspan="4" class="week-start">9주차</th>
+          <th colspan="5" class="cur-week week-start">10주차 ★</th>
+        </tr>
+        <tr>
+          <th class="sticky-col">대분류</th><th class="sticky-col2">중분류</th><th class="sticky-col3">항목</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="week-start">합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="cur-week week-start">합계</th><th class="cur-week">PC</th><th class="cur-week">M웹</th><th class="cur-week">APP</th><th class="cur-week">WoW</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- HTML -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="4">HTML</td><td class="sticky-col2">—</td>
+          <td class="sticky-col3">HTML top+middle</td>
+          <td class="bold">1,157</td><td>901</td><td>124</td><td>132</td>
+          <td class="week-start bold">483</td><td>454</td><td>12</td><td>17</td>
+          <td class="week-start bold">657</td><td>601</td><td>25</td><td>31</td>
+          <td class="week-start bold">428</td><td>385</td><td>26</td><td>17</td>
+          <td class="week-start bold">481</td><td>411</td><td>37</td><td>33</td>
+          <td class="week-start bold">564</td><td>417</td><td>39</td><td>108</td>
+          <td class="week-start bold">548</td><td>444</td><td>37</td><td>67</td>
+          <td class="week-start bold">870</td><td>724</td><td>70</td><td>76</td>
+          <td class="week-start bold">1,464</td><td>764</td><td>526</td><td>174</td>
+          <td class="cur-week bold">961</td><td class="cur-week">773</td><td class="cur-week">54</td><td class="cur-week">134</td>
+          <td class="cur-week wow-down">▼ 34.4%</td>
+        </tr>
+        <tr>
+          <td class="sticky-col2">top</td>
+          <td class="sticky-col3 sub-label">메인_html_top <span class="tt" data-tip="10주차: 음식물처리기 콘텐츠 연결 배너로 교체&#10;(9주차: 디램 관련 배너, M웹 462건으로 PC 압도)" style="margin-left:3px">?</span></td>
+          <td>879</td><td>645</td><td>111</td><td>123</td>
+          <td class="week-start">334</td><td>309</td><td>10</td><td>15</td>
+          <td class="week-start">468</td><td>430</td><td>17</td><td>21</td>
+          <td class="week-start">348</td><td>315</td><td>17</td><td>16</td>
+          <td class="week-start">374</td><td>316</td><td>30</td><td>28</td>
+          <td class="week-start bold">409</td><td>336</td><td>33</td><td>40</td>
+          <td class="week-start bold">441</td><td>355</td><td>25</td><td>61</td>
+          <td class="week-start bold">506</td><td>403</td><td>50</td><td>53</td>
+          <td class="week-start bold">806</td><td>242</td><td>462</td><td>102</td>
+          <td class="cur-week">317</td><td class="cur-week">209</td><td class="cur-week">36</td><td class="cur-week">72</td>
+          <td class="cur-week wow-down">▼ 60.7%</td>
+        </tr>
+        <tr>
+          <td class="sticky-col2">middle</td><td class="sticky-col3 sub-label">메인_html_middle</td>
+          <td>278</td><td>256</td><td>13</td><td>9</td>
+          <td class="week-start">149</td><td>145</td><td>2</td><td>2</td>
+          <td class="week-start">189</td><td>171</td><td>8</td><td>10</td>
+          <td class="week-start">80</td><td>70</td><td>9</td><td>1</td>
+          <td class="week-start">107</td><td>95</td><td>7</td><td>5</td>
+          <td class="week-start bold">155</td><td>81</td><td>6</td><td>68</td>
+          <td class="week-start">107</td><td>89</td><td>12</td><td>6</td>
+          <td class="week-start bold">364</td><td>321</td><td>20</td><td>23</td>
+          <td class="week-start bold">658</td><td>522</td><td>64</td><td>72</td>
+          <td class="cur-week bold">644</td><td class="cur-week">564</td><td class="cur-week">18</td><td class="cur-week">62</td>
+          <td class="cur-week wow-down">▼ 2.1%</td>
+        </tr>
+        <tr>
+          <td class="sticky-col2">bottom</td>
+          <td class="sticky-col3 sub-label">메인_html_bottom (YouTube) <span class="tt" data-tip="9주차 중 썸네일 4→6개 변경 적용&#10;이번 주 온전히 집계된 첫 주차 — 증가 효과로 추정" style="margin-left:3px">?</span></td>
+          <td>249</td><td>200</td><td>24</td><td>25</td>
+          <td class="week-start">114</td><td>99</td><td>6</td><td>9</td>
+          <td class="week-start">180</td><td>147</td><td>23</td><td>10</td>
+          <td class="week-start">121</td><td>99</td><td>6</td><td>16</td>
+          <td class="week-start">97</td><td>87</td><td>6</td><td>4</td>
+          <td class="week-start">127</td><td>104</td><td>8</td><td>15</td>
+          <td class="week-start">132</td><td>95</td><td>26</td><td>11</td>
+          <td class="week-start">163</td><td>119</td><td>28</td><td>16</td>
+          <td class="week-start">95</td><td>83</td><td>2</td><td>10</td>
+          <td class="cur-week bold">156</td><td class="cur-week">143</td><td class="cur-week">5</td><td class="cur-week">8</td>
+          <td class="cur-week wow-up">▲ 64.2%</td>
+        </tr>
+        <!-- 카테고리 -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="7">가격동향</td><td class="sticky-col2">카테고리</td>
+          <td class="sticky-col3">카테고리 합계 (6종)</td>
+          <td class="bold">2,663</td><td>2,297</td><td>319</td><td>47</td>
+          <td class="week-start bold">1,880</td><td>1,734</td><td>86</td><td>60</td>
+          <td class="week-start bold">1,925</td><td>1,843</td><td>48</td><td>34</td>
+          <td class="week-start bold">1,697</td><td>1,637</td><td>44</td><td>16</td>
+          <td class="week-start bold">1,735</td><td>1,587</td><td>28</td><td>120</td>
+          <td class="week-start bold">1,488</td><td>1,340</td><td>69</td><td>79</td>
+          <td class="week-start bold">1,847</td><td>1,667</td><td>18</td><td>162</td>
+          <td class="week-start bold">1,572</td><td>1,436</td><td>43</td><td>93</td>
+          <td class="week-start bold">1,393</td><td>1,255</td><td>23</td><td>115</td>
+          <td class="cur-week bold">1,317</td><td class="cur-week bold">1,233</td><td class="cur-week">28</td><td class="cur-week">56</td>
+          <td class="cur-week wow-down">▼ 5.5%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_AMDCPU <span class="tt" data-tip="10주차 카테고리 1위 — RAM 추월" style="margin-left:3px">?</span></td>
+          <td>526</td><td>457</td><td>62</td><td>7</td>
+          <td class="week-start">377</td><td>358</td><td>10</td><td>9</td>
+          <td class="week-start">390</td><td>378</td><td>5</td><td>7</td>
+          <td class="week-start">362</td><td>350</td><td>8</td><td>4</td>
+          <td class="week-start bold">406</td><td>382</td><td>6</td><td>18</td>
+          <td class="week-start bold">319</td><td>287</td><td>17</td><td>15</td>
+          <td class="week-start bold">385</td><td>362</td><td>2</td><td>21</td>
+          <td class="week-start bold">323</td><td>304</td><td>6</td><td>13</td>
+          <td class="week-start bold">312</td><td>281</td><td>6</td><td>25</td>
+          <td class="cur-week bold">292</td><td class="cur-week bold">280</td><td class="cur-week">3</td><td class="cur-week">9</td>
+          <td class="cur-week wow-down">▼ 6.4%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_RAM</td>
+          <td class="bold">610</td><td>504</td><td>87</td><td>19</td>
+          <td class="week-start bold">426</td><td>379</td><td>31</td><td>16</td>
+          <td class="week-start bold">454</td><td>426</td><td>18</td><td>10</td>
+          <td class="week-start bold">366</td><td>350</td><td>11</td><td>5</td>
+          <td class="week-start bold">365</td><td>338</td><td>7</td><td>20</td>
+          <td class="week-start bold">309</td><td>280</td><td>10</td><td>19</td>
+          <td class="week-start bold">403</td><td>363</td><td>6</td><td>34</td>
+          <td class="week-start bold">343</td><td>308</td><td>10</td><td>25</td>
+          <td class="week-start bold">317</td><td>286</td><td>5</td><td>26</td>
+          <td class="cur-week bold">287</td><td class="cur-week bold">269</td><td class="cur-week">4</td><td class="cur-week">14</td>
+          <td class="cur-week wow-down">▼ 9.5%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_엔비디아VGA</td>
+          <td>555</td><td>482</td><td>67</td><td>6</td>
+          <td class="week-start">398</td><td>373</td><td>12</td><td>13</td>
+          <td class="week-start">377</td><td>367</td><td>6</td><td>4</td>
+          <td class="week-start">354</td><td>341</td><td>10</td><td>3</td>
+          <td class="week-start">339</td><td>317</td><td>9</td><td>13</td>
+          <td class="week-start bold">294</td><td>262</td><td>16</td><td>16</td>
+          <td class="week-start bold">344</td><td>318</td><td>0</td><td>26</td>
+          <td class="week-start bold">298</td><td>273</td><td>9</td><td>16</td>
+          <td class="week-start bold">261</td><td>241</td><td>3</td><td>17</td>
+          <td class="cur-week bold">274</td><td class="cur-week bold">259</td><td class="cur-week">6</td><td class="cur-week">9</td>
+          <td class="cur-week wow-up">▲ 5.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_SSD</td>
+          <td>338</td><td>288</td><td>44</td><td>6</td>
+          <td class="week-start">239</td><td>223</td><td>9</td><td>7</td>
+          <td class="week-start">253</td><td>240</td><td>10</td><td>3</td>
+          <td class="week-start">224</td><td>216</td><td>7</td><td>1</td>
+          <td class="week-start">239</td><td>229</td><td>3</td><td>7</td>
+          <td class="week-start">213</td><td>195</td><td>5</td><td>13</td>
+          <td class="week-start bold">300</td><td>259</td><td>4</td><td>37</td>
+          <td class="week-start">233</td><td>209</td><td>3</td><td>21</td>
+          <td class="week-start">220</td><td>193</td><td>4</td><td>23</td>
+          <td class="cur-week">185</td><td class="cur-week">175</td><td class="cur-week">1</td><td class="cur-week">9</td>
+          <td class="cur-week wow-down">▼ 15.9%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_AMDVGA</td>
+          <td>413</td><td>362</td><td>45</td><td>6</td>
+          <td class="week-start">279</td><td>250</td><td>18</td><td>11</td>
+          <td class="week-start">302</td><td>290</td><td>7</td><td>5</td>
+          <td class="week-start">235</td><td>227</td><td>5</td><td>3</td>
+          <td class="week-start">223</td><td>208</td><td>2</td><td>13</td>
+          <td class="week-start">227</td><td>196</td><td>13</td><td>18</td>
+          <td class="week-start">277</td><td>244</td><td>5</td><td>28</td>
+          <td class="week-start">235</td><td>209</td><td>11</td><td>15</td>
+          <td class="week-start">187</td><td>166</td><td>5</td><td>16</td>
+          <td class="cur-week">174</td><td class="cur-week">155</td><td class="cur-week">12</td><td class="cur-week">7</td>
+          <td class="cur-week wow-down">▼ 7.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">카테고리</td><td class="sticky-col3 sub-label">메인_가격동향_인텔CPU</td>
+          <td>221</td><td>204</td><td>14</td><td>3</td>
+          <td class="week-start">161</td><td>151</td><td>6</td><td>4</td>
+          <td class="week-start">149</td><td>142</td><td>2</td><td>5</td>
+          <td class="week-start">156</td><td>153</td><td>3</td><td>0</td>
+          <td class="week-start">163</td><td>153</td><td>1</td><td>9</td>
+          <td class="week-start">126</td><td>120</td><td>3</td><td>3</td>
+          <td class="week-start">138</td><td>130</td><td>1</td><td>7</td>
+          <td class="week-start">140</td><td>133</td><td>4</td><td>3</td>
+          <td class="week-start">96</td><td>88</td><td>1</td><td>7</td>
+          <td class="cur-week">105</td><td class="cur-week">101</td><td class="cur-week">2</td><td class="cur-week">2</td>
+          <td class="cur-week wow-up">▲ 9.4%</td>
+        </tr>
+        <!-- 상품이동 -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="5">가격동향</td><td class="sticky-col2">상품이동</td>
+          <td class="sticky-col3">상품이동 합계 <span class="tag green" style="font-size:9px">5주차~수집</span></td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">169</td><td>95</td><td>21</td><td>53</td>
+          <td class="week-start">297</td><td>231</td><td>36</td><td>30</td>
+          <td class="week-start bold">504</td><td>388</td><td>57</td><td>59</td>
+          <td class="week-start">430</td><td>353</td><td>40</td><td>37</td>
+          <td class="week-start bold">702</td><td>439</td><td>188</td><td>75</td>
+          <td class="cur-week bold">333</td><td class="cur-week bold">298</td><td class="cur-week">20</td><td class="cur-week">15</td>
+          <td class="cur-week wow-down">▼ 52.6%</td>
+        </tr>
+        <tr><td class="sticky-col2">상품이동</td><td class="sticky-col3 sub-label">메인_가격동향상품이동_오늘인기순</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">116</td><td>74</td><td>13</td><td>29</td>
+          <td class="week-start bold">240</td><td>188</td><td>25</td><td>27</td>
+          <td class="week-start bold">365</td><td>304</td><td>36</td><td>25</td>
+          <td class="week-start bold">277</td><td>233</td><td>29</td><td>15</td>
+          <td class="week-start bold">387</td><td>282</td><td>76</td><td>29</td>
+          <td class="cur-week bold">212</td><td class="cur-week bold">195</td><td class="cur-week">14</td><td class="cur-week">3</td>
+          <td class="cur-week wow-down">▼ 45.2%</td>
+        </tr>
+        <tr><td class="sticky-col2">상품이동</td><td class="sticky-col3 sub-label">메인_가격동향상품이동_하락률순</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">30</td><td>12</td><td>0</td><td>18</td>
+          <td class="week-start">17</td><td>15</td><td>0</td><td>2</td>
+          <td class="week-start bold">69</td><td>41</td><td>3</td><td>25</td>
+          <td class="week-start">56</td><td>40</td><td>3</td><td>13</td>
+          <td class="week-start">79</td><td>34</td><td>10</td><td>35</td>
+          <td class="cur-week">49</td><td class="cur-week">41</td><td class="cur-week">2</td><td class="cur-week">6</td>
+          <td class="cur-week wow-down">▼ 38.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">상품이동</td><td class="sticky-col3 sub-label">메인_가격동향상품이동_판매량순</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">22</td><td>8</td><td>8</td><td>6</td>
+          <td class="week-start">37</td><td>26</td><td>10</td><td>1</td>
+          <td class="week-start">52</td><td>31</td><td>18</td><td>3</td>
+          <td class="week-start bold">82</td><td>71</td><td>11</td><td>0</td>
+          <td class="week-start bold">212</td><td>113</td><td>99</td><td>0</td>
+          <td class="cur-week">48</td><td class="cur-week">44</td><td class="cur-week">4</td><td class="cur-week">0</td>
+          <td class="cur-week wow-down">▼ 77.4%</td>
+        </tr>
+        <tr><td class="sticky-col2">상품이동</td><td class="sticky-col3 sub-label">메인_가격동향상품이동_상승률순</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">3</td><td>2</td><td>1</td><td>0</td>
+          <td class="week-start">18</td><td>12</td><td>0</td><td>6</td>
+          <td class="week-start">15</td><td>9</td><td>0</td><td>6</td>
+          <td class="week-start">24</td><td>10</td><td>3</td><td>11</td>
+          <td class="cur-week">24</td><td class="cur-week">18</td><td class="cur-week">0</td><td class="cur-week">6</td>
+          <td class="cur-week wow-up">▲ 0.0%</td>
+        </tr>
+        <!-- 정렬기준 -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="4">가격동향</td><td class="sticky-col2">정렬기준</td>
+          <td class="sticky-col3">메인_가격동향_판매량순</td>
+          <td>208</td><td>177</td><td>31</td><td>0</td>
+          <td class="week-start">158</td><td>139</td><td>9</td><td>10</td>
+          <td class="week-start">122</td><td>112</td><td>9</td><td>1</td>
+          <td class="week-start">117</td><td>112</td><td>4</td><td>1</td>
+          <td class="week-start">129</td><td>114</td><td>8</td><td>7</td>
+          <td class="week-start bold">125</td><td>106</td><td>13</td><td>6</td>
+          <td class="week-start bold">141</td><td>118</td><td>14</td><td>9</td>
+          <td class="week-start">114</td><td>100</td><td>5</td><td>9</td>
+          <td class="week-start bold">188</td><td>149</td><td>34</td><td>5</td>
+          <td class="cur-week bold">133</td><td class="cur-week">120</td><td class="cur-week">11</td><td class="cur-week">2</td>
+          <td class="cur-week wow-down">▼ 29.3%</td>
+        </tr>
+        <tr><td class="sticky-col2">정렬기준</td><td class="sticky-col3 sub-label">메인_가격동향_하락률순</td>
+          <td>177</td><td>151</td><td>22</td><td>4</td>
+          <td class="week-start">161</td><td>147</td><td>10</td><td>4</td>
+          <td class="week-start">157</td><td>138</td><td>5</td><td>14</td>
+          <td class="week-start bold">122</td><td>111</td><td>8</td><td>3</td>
+          <td class="week-start bold">136</td><td>108</td><td>3</td><td>25</td>
+          <td class="week-start">93</td><td>83</td><td>3</td><td>7</td>
+          <td class="week-start bold">181</td><td>126</td><td>6</td><td>49</td>
+          <td class="week-start">124</td><td>82</td><td>4</td><td>38</td>
+          <td class="week-start bold">153</td><td>103</td><td>9</td><td>41</td>
+          <td class="cur-week">125</td><td class="cur-week">94</td><td class="cur-week">8</td><td class="cur-week">23</td>
+          <td class="cur-week wow-down">▼ 18.3%</td>
+        </tr>
+        <tr><td class="sticky-col2">정렬기준</td><td class="sticky-col3 sub-label">메인_가격동향_상승률순</td>
+          <td>164</td><td>134</td><td>22</td><td>8</td>
+          <td class="week-start">118</td><td>109</td><td>8</td><td>1</td>
+          <td class="week-start">97</td><td>84</td><td>8</td><td>5</td>
+          <td class="week-start">71</td><td>68</td><td>3</td><td>0</td>
+          <td class="week-start bold">117</td><td>103</td><td>4</td><td>10</td>
+          <td class="week-start">59</td><td>52</td><td>2</td><td>5</td>
+          <td class="week-start bold">111</td><td>85</td><td>1</td><td>25</td>
+          <td class="week-start">69</td><td>44</td><td>2</td><td>23</td>
+          <td class="week-start">78</td><td>50</td><td>7</td><td>21</td>
+          <td class="cur-week bold">98</td><td class="cur-week">84</td><td class="cur-week">2</td><td class="cur-week">12</td>
+          <td class="cur-week wow-up">▲ 25.6%</td>
+        </tr>
+        <tr><td class="sticky-col2">정렬기준</td><td class="sticky-col3 sub-label">메인_가격동향_오늘인기순 <span class="tag" style="font-size:9px">기본값</span></td>
+          <td class="gray-val">77</td><td class="gray-val">61</td><td class="gray-val">14</td><td class="gray-val">2</td>
+          <td class="week-start gray-val">54</td><td class="gray-val">50</td><td class="gray-val">1</td><td class="gray-val">3</td>
+          <td class="week-start gray-val">61</td><td class="gray-val">53</td><td class="gray-val">4</td><td class="gray-val">4</td>
+          <td class="week-start gray-val">54</td><td class="gray-val">52</td><td class="gray-val">1</td><td class="gray-val">1</td>
+          <td class="week-start gray-val">60</td><td class="gray-val">51</td><td class="gray-val">4</td><td class="gray-val">5</td>
+          <td class="week-start gray-val">28</td><td class="gray-val">25</td><td class="gray-val">1</td><td class="gray-val">2</td>
+          <td class="week-start gray-val">66</td><td class="gray-val">48</td><td class="gray-val">9</td><td class="gray-val">9</td>
+          <td class="week-start gray-val">46</td><td class="gray-val">38</td><td class="gray-val">3</td><td class="gray-val">5</td>
+          <td class="week-start gray-val">51</td><td class="gray-val">42</td><td class="gray-val">5</td><td class="gray-val">4</td>
+          <td class="cur-week gray-val">42</td><td class="cur-week gray-val">41</td><td class="cur-week gray-val">1</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 17.6%</td>
+        </tr>
+        <!-- 데이터기준 -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">가격동향</td><td class="sticky-col2">데이터기준</td>
+          <td class="sticky-col3">메인_가격동향_30일</td>
+          <td class="bold">470</td><td>375</td><td>71</td><td>24</td>
+          <td class="week-start bold">324</td><td>286</td><td>25</td><td>13</td>
+          <td class="week-start bold">300</td><td>286</td><td>9</td><td>5</td>
+          <td class="week-start bold">251</td><td>236</td><td>8</td><td>7</td>
+          <td class="week-start bold">258</td><td>244</td><td>4</td><td>10</td>
+          <td class="week-start bold">215</td><td>190</td><td>12</td><td>13</td>
+          <td class="week-start bold">253</td><td>213</td><td>8</td><td>32</td>
+          <td class="week-start bold">223</td><td>200</td><td>8</td><td>15</td>
+          <td class="week-start bold">223</td><td>201</td><td>3</td><td>19</td>
+          <td class="cur-week bold">247</td><td class="cur-week bold">223</td><td class="cur-week">12</td><td class="cur-week">12</td>
+          <td class="cur-week wow-up">▲ 10.8%</td>
+        </tr>
+        <tr><td class="sticky-col2">데이터기준</td><td class="sticky-col3 sub-label">메인_가격동향_15일</td>
+          <td>345</td><td>287</td><td>41</td><td>17</td>
+          <td class="week-start">199</td><td>190</td><td>8</td><td>1</td>
+          <td class="week-start">209</td><td>202</td><td>7</td><td>0</td>
+          <td class="week-start">169</td><td>162</td><td>4</td><td>3</td>
+          <td class="week-start">147</td><td>143</td><td>1</td><td>3</td>
+          <td class="week-start">145</td><td>134</td><td>6</td><td>5</td>
+          <td class="week-start">162</td><td>154</td><td>1</td><td>7</td>
+          <td class="week-start">157</td><td>156</td><td>1</td><td>0</td>
+          <td class="week-start">142</td><td>138</td><td>1</td><td>3</td>
+          <td class="cur-week bold">164</td><td class="cur-week">158</td><td class="cur-week">4</td><td class="cur-week">2</td>
+          <td class="cur-week wow-up">▲ 15.5%</td>
+        </tr>
+        <tr><td class="sticky-col2">데이터기준</td><td class="sticky-col3 sub-label">메인_가격동향_7일 <span class="tag" style="font-size:9px">기본값</span></td>
+          <td class="gray-val">198</td><td class="gray-val">161</td><td class="gray-val">27</td><td class="gray-val">10</td>
+          <td class="week-start gray-val">131</td><td class="gray-val">123</td><td class="gray-val">8</td><td class="gray-val">0</td>
+          <td class="week-start gray-val">126</td><td class="gray-val">120</td><td class="gray-val">5</td><td class="gray-val">1</td>
+          <td class="week-start gray-val">106</td><td class="gray-val">101</td><td class="gray-val">3</td><td class="gray-val">2</td>
+          <td class="week-start gray-val">101</td><td class="gray-val">100</td><td class="gray-val">0</td><td class="gray-val">1</td>
+          <td class="week-start gray-val">86</td><td class="gray-val">82</td><td class="gray-val">3</td><td class="gray-val">1</td>
+          <td class="week-start gray-val">107</td><td class="gray-val">96</td><td class="gray-val">1</td><td class="gray-val">10</td>
+          <td class="week-start gray-val">104</td><td class="gray-val">101</td><td class="gray-val">1</td><td class="gray-val">2</td>
+          <td class="week-start gray-val">84</td><td class="gray-val">82</td><td class="gray-val">0</td><td class="gray-val">2</td>
+          <td class="cur-week gray-val">115</td><td class="cur-week gray-val">110</td><td class="cur-week gray-val">4</td><td class="cur-week gray-val">1</td>
+          <td class="cur-week wow-up">▲ 36.9%</td>
+        </tr>
+        <!-- 페이지 -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="8">가격동향</td><td class="sticky-col2">페이지</td>
+          <td class="sticky-col3">p1~5 합계 <span class="tag" style="font-size:9px">PC</span></td>
+          <td class="bold">993</td><td>977</td><td>16</td><td>0</td>
+          <td class="week-start bold">574</td><td>574</td><td>0</td><td>0</td>
+          <td class="week-start bold">607</td><td>599</td><td>1</td><td>7</td>
+          <td class="week-start bold">568</td><td>568</td><td>0</td><td>0</td>
+          <td class="week-start bold">574</td><td>574</td><td>0</td><td>0</td>
+          <td class="week-start bold">535</td><td>535</td><td>0</td><td>0</td>
+          <td class="week-start bold">776</td><td>776</td><td>0</td><td>0</td>
+          <td class="week-start bold">717</td><td>717</td><td>0</td><td>0</td>
+          <td class="week-start bold">839</td><td>839</td><td>0</td><td>0</td>
+          <td class="cur-week bold">545</td><td class="cur-week bold">545</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 35.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p1 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>106</td><td>104</td><td>2</td><td>0</td>
+          <td class="week-start">73</td><td>73</td><td>0</td><td>0</td>
+          <td class="week-start">79</td><td>77</td><td>0</td><td>2</td>
+          <td class="week-start gray-val">84</td><td>84</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">72</td><td>72</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">70</td><td>70</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">93</td><td>93</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">95</td><td>95</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">119</td><td>119</td><td>0</td><td>0</td>
+          <td class="cur-week gray-val">74</td><td class="cur-week">74</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 37.8%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p2 <span class="tag" style="font-size:9px">PC</span></td>
+          <td class="bold">338</td><td>335</td><td>3</td><td>0</td>
+          <td class="week-start bold">212</td><td>212</td><td>0</td><td>0</td>
+          <td class="week-start bold">242</td><td>239</td><td>1</td><td>2</td>
+          <td class="week-start bold">199</td><td>198</td><td>0</td><td>1</td>
+          <td class="week-start bold">201</td><td>201</td><td>0</td><td>0</td>
+          <td class="week-start bold">191</td><td>189</td><td>0</td><td>2</td>
+          <td class="week-start bold">258</td><td>256</td><td>0</td><td>2</td>
+          <td class="week-start bold">254</td><td>251</td><td>0</td><td>3</td>
+          <td class="week-start bold">294</td><td>293</td><td>0</td><td>1</td>
+          <td class="cur-week bold">193</td><td class="cur-week bold">193</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 34.4%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p3 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>228</td><td>225</td><td>3</td><td>0</td>
+          <td class="week-start">120</td><td>120</td><td>0</td><td>0</td>
+          <td class="week-start">146</td><td>145</td><td>0</td><td>1</td>
+          <td class="week-start">118</td><td>118</td><td>0</td><td>0</td>
+          <td class="week-start">118</td><td>118</td><td>0</td><td>0</td>
+          <td class="week-start">119</td><td>119</td><td>0</td><td>0</td>
+          <td class="week-start">179</td><td>179</td><td>0</td><td>0</td>
+          <td class="week-start">153</td><td>151</td><td>0</td><td>2</td>
+          <td class="week-start">185</td><td>185</td><td>0</td><td>0</td>
+          <td class="cur-week">122</td><td class="cur-week">122</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 34.1%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p4 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>176</td><td>171</td><td>5</td><td>0</td>
+          <td class="week-start">93</td><td>93</td><td>0</td><td>0</td>
+          <td class="week-start">96</td><td>94</td><td>0</td><td>2</td>
+          <td class="week-start">89</td><td>89</td><td>0</td><td>0</td>
+          <td class="week-start">96</td><td>96</td><td>0</td><td>0</td>
+          <td class="week-start">87</td><td>87</td><td>0</td><td>0</td>
+          <td class="week-start">138</td><td>138</td><td>0</td><td>0</td>
+          <td class="week-start">119</td><td>117</td><td>0</td><td>2</td>
+          <td class="week-start">141</td><td>141</td><td>0</td><td>0</td>
+          <td class="cur-week">89</td><td class="cur-week">89</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 36.9%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p5 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>145</td><td>142</td><td>3</td><td>0</td>
+          <td class="week-start">76</td><td>76</td><td>0</td><td>0</td>
+          <td class="week-start">85</td><td>84</td><td>0</td><td>1</td>
+          <td class="week-start">78</td><td>78</td><td>0</td><td>0</td>
+          <td class="week-start">87</td><td>87</td><td>0</td><td>0</td>
+          <td class="week-start">68</td><td>68</td><td>0</td><td>0</td>
+          <td class="week-start">108</td><td>108</td><td>0</td><td>0</td>
+          <td class="week-start">96</td><td>94</td><td>0</td><td>2</td>
+          <td class="week-start">100</td><td>100</td><td>0</td><td>0</td>
+          <td class="cur-week">67</td><td class="cur-week">67</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 33.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p이전 <span class="tag" style="font-size:9px">모바일</span></td>
+          <td>128</td><td class="gray-val">0</td><td>115</td><td>13</td>
+          <td class="week-start">72</td><td class="gray-val">0</td><td>52</td><td>20</td>
+          <td class="week-start">31</td><td class="gray-val">0</td><td>28</td><td>3</td>
+          <td class="week-start">28</td><td class="gray-val">0</td><td>25</td><td>3</td>
+          <td class="week-start bold">88</td><td class="gray-val">0</td><td>43</td><td>45</td>
+          <td class="week-start">61</td><td class="gray-val">0</td><td>31</td><td>30</td>
+          <td class="week-start">72</td><td class="gray-val">0</td><td>28</td><td>43</td>
+          <td class="week-start">62</td><td class="gray-val">7</td><td>45</td><td>10</td>
+          <td class="week-start">71</td><td class="gray-val">0</td><td>52</td><td>19</td>
+          <td class="cur-week">10</td><td class="cur-week gray-val">0</td><td class="cur-week">9</td><td class="cur-week">1</td>
+          <td class="cur-week wow-down">▼ 85.9%</td>
+        </tr>
+        <tr><td class="sticky-col2">페이지</td><td class="sticky-col3 sub-label">메인_가격동향_p다음 <span class="tag" style="font-size:9px">모바일</span></td>
+          <td>583</td><td class="gray-val">0</td><td>508</td><td>75</td>
+          <td class="week-start">256</td><td class="gray-val">0</td><td>153</td><td>103</td>
+          <td class="week-start">170</td><td class="gray-val">0</td><td>139</td><td>31</td>
+          <td class="week-start">96</td><td class="gray-val">0</td><td>86</td><td>10</td>
+          <td class="week-start bold">194</td><td class="gray-val">0</td><td>93</td><td>101</td>
+          <td class="week-start">193</td><td class="gray-val">0</td><td>84</td><td>109</td>
+          <td class="week-start bold">230</td><td class="gray-val">5</td><td>73</td><td>152</td>
+          <td class="week-start">129</td><td class="gray-val">10</td><td>68</td><td>51</td>
+          <td class="week-start bold">216</td><td class="gray-val">0</td><td>133</td><td>83</td>
+          <td class="cur-week">58</td><td class="cur-week gray-val">0</td><td class="cur-week">33</td><td class="cur-week">25</td>
+          <td class="cur-week wow-down">▼ 73.1%</td>
+        </tr>
+        <!-- GNB -->
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">GNB</td><td class="sticky-col2">GNB</td>
+          <td class="sticky-col3">GNB_다나와로고</td>
+          <td>193</td><td>167</td><td>11</td><td>15</td>
+          <td class="week-start">183</td><td>172</td><td>3</td><td>8</td>
+          <td class="week-start">205</td><td>195</td><td>4</td><td>6</td>
+          <td class="week-start">157</td><td>150</td><td>4</td><td>3</td>
+          <td class="week-start bold">195</td><td>178</td><td>6</td><td>11</td>
+          <td class="week-start">141</td><td>122</td><td>7</td><td>12</td>
+          <td class="week-start">144</td><td>130</td><td>8</td><td>6</td>
+          <td class="week-start bold">198</td><td>162</td><td>22</td><td>14</td>
+          <td class="week-start bold">215</td><td>193</td><td>5</td><td>17</td>
+          <td class="cur-week bold">158</td><td class="cur-week">135</td><td class="cur-week">8</td><td class="cur-week">15</td>
+          <td class="cur-week wow-down">▼ 26.5%</td>
+        </tr>
+        <tr><td class="sticky-col2">GNB</td><td class="sticky-col3 sub-label">GNB_답나와로고</td>
+          <td>60</td><td>48</td><td>5</td><td>7</td>
+          <td class="week-start">30</td><td>29</td><td>0</td><td>1</td>
+          <td class="week-start">34</td><td>31</td><td>3</td><td>0</td>
+          <td class="week-start">26</td><td>25</td><td>1</td><td>0</td>
+          <td class="week-start">36</td><td>32</td><td>3</td><td>1</td>
+          <td class="week-start">30</td><td>25</td><td>1</td><td>4</td>
+          <td class="week-start">31</td><td>27</td><td>2</td><td>2</td>
+          <td class="week-start bold">57</td><td>33</td><td>19</td><td>5</td>
+          <td class="week-start bold">98</td><td>24</td><td>74</td><td>0</td>
+          <td class="cur-week">37</td><td class="cur-week">24</td><td class="cur-week">5</td><td class="cur-week">8</td>
+          <td class="cur-week wow-down">▼ 62.2%</td>
+        </tr>
+        <tr><td class="sticky-col2">GNB</td><td class="sticky-col3 sub-label">GNB 기타</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">18</td><td>18</td><td>0</td><td>0</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="week-start">34</td><td>30</td><td>1</td><td>3</td>
+          <td class="week-start">18</td><td>17</td><td>0</td><td>1</td>
+          <td class="week-start">21</td><td>19</td><td>2</td><td>0</td>
+          <td class="cur-week">47</td><td class="cur-week">45</td><td class="cur-week">2</td><td class="cur-week">0</td>
+          <td class="cur-week wow-up">▲ 123.8%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== TAB 6: 콘텐츠 주요 클릭 ===== -->
+<div id="tab-contentclick" class="tab-content">
+  <h2 class="tab-analysis-title">10주차 분석 <span>답나와 콘텐츠 주요 클릭</span></h2>
+  <div class="section-title">이번 주 인사이트</div>
+  <div class="insight-box">
+    <h3><span class="badge down">하락</span> 콘텐츠 클릭 전반 감소 — 도움이됐어요 ▼61.7%, 다나와 이동 ▼31.3%</h3>
+    <ul>
+      <li>'도움이됐어요' 클릭 133 → <strong>51(▼61.7%)</strong>, 반응률 2.8% → <strong>1.4%</strong> — 콘텐츠 PV 감소와 함께 반응률도 하락. 9주차 급등(133건)에서 조정</li>
+      <li>GNB 다나와로고(콘텐츠→다나와 이동) 150 → <strong>103(▼31.3%)</strong> — 콘텐츠 PV 감소에 연동되어 감소. 절대 수치로는 7·8주차 수준(58~61건)보다 여전히 높은 편</li>
+      <li>공유하기 관련 클릭(GNB 공유하기 14, 카카오톡 7, 링크복사 3)이 전주 대비 증가 — 이번 주 신규 콘텐츠(테이프 가이드, 답나와 유즈드 등) 공유 행동 증가 가능성</li>
+    </ul>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card">
+      <h4>주차별 도움이됐어요 클릭 및 반응률</h4>
+      <canvas id="chartHelp"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>10주차 콘텐츠 클릭 구성</h4>
+      <canvas id="chartContentClickPie"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">콘텐츠 주요 클릭 전체</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr class="week-header">
+          <th class="sticky-col" style="min-width:60px">대분류</th>
+          <th class="sticky-col2" style="min-width:240px">항목</th>
+          <th colspan="4">1주차</th><th colspan="4">2주차</th><th colspan="4">3주차</th>
+          <th colspan="4">4주차</th><th colspan="4">5주차</th><th colspan="4">6주차</th>
+          <th colspan="4">7주차</th><th colspan="4">8주차</th><th colspan="4">9주차</th>
+          <th colspan="5" class="cur-week week-start">10주차 ★</th>
+        </tr>
+        <tr>
+          <th class="sticky-col">대분류</th><th class="sticky-col2">항목</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th>합계</th><th>PC</th><th>M웹</th><th>APP</th>
+          <th class="cur-week week-start">합계</th><th class="cur-week">PC</th><th class="cur-week">M웹</th><th class="cur-week">APP</th><th class="cur-week">WoW</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sub-group">
+          <td class="sticky-col">콘텐츠</td><td class="sticky-col2">콘텐츠_도움이됐어요</td>
+          <td class="bold">218</td><td>147</td><td>30</td><td>41</td>
+          <td>22</td><td>21</td><td>1</td><td>0</td>
+          <td>104</td><td>73</td><td>3</td><td>28</td>
+          <td>69</td><td>46</td><td>12</td><td>11</td>
+          <td>83</td><td>66</td><td>8</td><td>9</td>
+          <td class="bold">49</td><td>42</td><td>5</td><td>2</td>
+          <td>47</td><td>28</td><td>9</td><td>10</td>
+          <td>33</td><td>26</td><td>1</td><td>6</td>
+          <td class="bold">133</td><td>107</td><td>21</td><td>5</td>
+          <td class="cur-week bold">51</td><td class="cur-week bold">39</td><td class="cur-week">7</td><td class="cur-week">5</td>
+          <td class="cur-week wow-down">▼ 61.7%</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">GNB</td><td class="sticky-col2">GNB_다나와로고</td>
+          <td>48</td><td>19</td><td>16</td><td>13</td>
+          <td>22</td><td>20</td><td>0</td><td>2</td>
+          <td>73</td><td>57</td><td>3</td><td>13</td>
+          <td>106</td><td>86</td><td>6</td><td>14</td>
+          <td class="bold">119</td><td>90</td><td>6</td><td>23</td>
+          <td class="bold">158</td><td>138</td><td>4</td><td>16</td>
+          <td>58</td><td>45</td><td>4</td><td>9</td>
+          <td>61</td><td>48</td><td>3</td><td>10</td>
+          <td class="bold">150</td><td>128</td><td>2</td><td>20</td>
+          <td class="cur-week bold">103</td><td class="cur-week bold">82</td><td class="cur-week">3</td><td class="cur-week">18</td>
+          <td class="cur-week wow-down">▼ 31.3%</td>
+        </tr>
+        <tr><td class="sticky-col2">GNB_답나와로고</td>
+          <td>73</td><td>53</td><td>9</td><td>11</td>
+          <td>21</td><td>20</td><td>0</td><td>1</td>
+          <td>47</td><td>42</td><td>5</td><td>0</td>
+          <td>59</td><td>55</td><td>4</td><td>0</td>
+          <td>60</td><td>55</td><td>3</td><td>2</td>
+          <td>61</td><td>52</td><td>7</td><td>2</td>
+          <td>39</td><td>35</td><td>3</td><td>1</td>
+          <td>50</td><td>46</td><td>3</td><td>1</td>
+          <td class="bold">135</td><td>120</td><td>9</td><td>6</td>
+          <td class="cur-week bold">85</td><td class="cur-week bold">69</td><td class="cur-week">6</td><td class="cur-week">10</td>
+          <td class="cur-week wow-down">▼ 37.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">GNB 기타</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td>15</td><td>13</td><td>0</td><td>2</td>
+          <td>10</td><td>10</td><td>0</td><td>0</td>
+          <td>8</td><td>7</td><td>0</td><td>1</td>
+          <td>6</td><td>5</td><td>0</td><td>1</td>
+          <td>12</td><td>10</td><td>0</td><td>2</td>
+          <td>10</td><td>8</td><td>0</td><td>2</td>
+          <td class="cur-week">12</td><td class="cur-week">10</td><td class="cur-week">0</td><td class="cur-week">2</td>
+          <td class="cur-week wow-up">▲ 20.0%</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">공유하기</td><td class="sticky-col2">GNB_공유하기 (버튼)</td>
+          <td class="gray-val">6</td><td class="gray-val">5</td><td class="gray-val">0</td><td class="gray-val">1</td>
+          <td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="gray-val">4</td><td class="gray-val">0</td><td class="gray-val">1</td><td class="gray-val">3</td>
+          <td class="gray-val">3</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">3</td>
+          <td class="gray-val">2</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">2</td>
+          <td class="gray-val">1</td><td class="gray-val">0</td><td class="gray-val">1</td><td class="gray-val">0</td>
+          <td class="gray-val">5</td><td class="gray-val">1</td><td class="gray-val">1</td><td class="gray-val">3</td>
+          <td class="gray-val">2</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">2</td>
+          <td class="gray-val">4</td><td class="gray-val">3</td><td class="gray-val">0</td><td class="gray-val">1</td>
+          <td class="cur-week gray-val">14</td><td class="cur-week gray-val">7</td><td class="cur-week gray-val">4</td><td class="cur-week gray-val">3</td>
+          <td class="cur-week wow-up">▲ 250.0%</td>
+        </tr>
+        <tr><td class="sticky-col2">공유하기레이어_카카오톡</td>
+          <td class="gray-val">1</td><td class="gray-val">1</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="gray-val">1</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">1</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">2</td><td class="gray-val">0</td><td class="gray-val">1</td><td class="gray-val">1</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="cur-week gray-val">7</td><td class="cur-week gray-val">3</td><td class="cur-week gray-val">3</td><td class="cur-week gray-val">1</td>
+          <td class="cur-week">—</td>
+        </tr>
+        <tr><td class="sticky-col2">공유하기레이어_링크복사</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">2</td><td class="gray-val">0</td><td class="gray-val">0</td><td class="gray-val">2</td>
+          <td class="gray-val">2</td><td class="gray-val">2</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="cur-week gray-val">3</td><td class="cur-week gray-val">3</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week">—</td>
+        </tr>
+        <tr class="sub-group">
+          <td class="sticky-col" rowspan="3">플로팅</td><td class="sticky-col2">플로팅_이동버튼_위로</td>
+          <td>65</td><td>34</td><td>12</td><td>19</td>
+          <td>6</td><td>4</td><td>0</td><td>2</td>
+          <td>13</td><td>6</td><td>1</td><td>6</td>
+          <td>26</td><td>17</td><td>1</td><td>8</td>
+          <td>3</td><td>1</td><td>1</td><td>1</td>
+          <td>2</td><td>2</td><td>0</td><td>0</td>
+          <td>6</td><td>1</td><td>1</td><td>4</td>
+          <td>12</td><td>8</td><td>0</td><td>4</td>
+          <td class="bold">34</td><td>25</td><td>3</td><td>6</td>
+          <td class="cur-week bold">31</td><td class="cur-week">19</td><td class="cur-week">5</td><td class="cur-week">7</td>
+          <td class="cur-week wow-down">▼ 8.8%</td>
+        </tr>
+        <tr><td class="sticky-col2">플로팅_이동버튼_이전페이지로 <span class="tag" style="font-size:9px">모바일</span></td>
+          <td>33</td><td class="gray-val">0</td><td>3</td><td>30</td>
+          <td>2</td><td class="gray-val">0</td><td>1</td><td>1</td>
+          <td>1</td><td class="gray-val">0</td><td>1</td><td>0</td>
+          <td>9</td><td class="gray-val">0</td><td>0</td><td>9</td>
+          <td>1</td><td class="gray-val">0</td><td>0</td><td>1</td>
+          <td>2</td><td class="gray-val">0</td><td>0</td><td>2</td>
+          <td>16</td><td class="gray-val">0</td><td>2</td><td>14</td>
+          <td>19</td><td class="gray-val">0</td><td>10</td><td>9</td>
+          <td class="bold">27</td><td class="gray-val">0</td><td>0</td><td>27</td>
+          <td class="cur-week">11</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td><td class="cur-week">11</td>
+          <td class="cur-week wow-down">▼ 59.3%</td>
+        </tr>
+        <tr><td class="sticky-col2">플로팅_이동버튼_아래로 <span class="tag" style="font-size:9px">PC</span></td>
+          <td>40</td><td>40</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td>0</td><td>0</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td>0</td><td>0</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td>1</td><td>1</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td>2</td><td>2</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td><td class="gray-val">—</td>
+          <td class="bold">10</td><td>10</td><td class="gray-val">0</td><td class="gray-val">0</td>
+          <td class="cur-week">6</td><td class="cur-week">6</td><td class="cur-week gray-val">0</td><td class="cur-week gray-val">0</td>
+          <td class="cur-week wow-down">▼ 40.0%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.getAttribute('onclick').includes("'" + id + "'")) btn.classList.add('active');
+  });
+}
+Chart.register(ChartDataLabels);
+Chart.defaults.plugins.datalabels = { display: false };
+const weeksShort = ['1주차','2주차','3주차','4주차','5주차','6주차','7주차','8주차','9주차','10주차'];
+const ACCENT='#e85c2b', C_UP='#d63b3b', C_DOWN='#2a7de1', C_GREEN='#2a9d57';
+Chart.defaults.font = { family:"'Apple SD Gothic Neo', sans-serif", size:11 };
+Chart.defaults.color = '#888';
+const WOW_MAINPV=[null,'▼18.3%','▲79.7%','▼6.6%','▲28.4%','▼6.4%','▼29.0%','▲34.2%','▲37.0%','▼19.1%'];
+const WOW_CONTENTPV=[null,'▼38.2%','▲216.9%','▲6.5%','▲40.8%','▼5.1%','▼52.6%','▲56.1%','▲57.3%','▼25.2%'];
+const WOW_ENTRY_PC=[null,'▲0.5%','▲16.4%','▼20.3%','▲6.5%','▼13.2%','▲17.0%','▼4.1%','▲4.5%','▼4.7%'];
+const WOW_ENTRY_M=[null,'▼51.9%','▲20.0%','▲3.9%','▲67.9%','▲19.7%','▲1.9%','▲40.1%','▲6.2%','▼46.4%'];
+
+function makeBarLine(id, barData, lineDs, wow) {
+  new Chart(document.getElementById(id), {
+    type:'bar', data:{ labels:weeksShort, datasets:[
+      { type:'bar', label:'합계', data:barData, backgroundColor:weeksShort.map((_,i)=>i===9?ACCENT+'cc':'#ddd'), yAxisID:'y', order:2 },
+      ...lineDs.map(d=>({...d, order:1}))
+    ]},
+    options:{ responsive:true, maintainAspectRatio:true,
+      plugins:{ legend:{position:'bottom',labels:{boxWidth:10,padding:6}},
+        datalabels:{ display:(ctx)=>ctx.dataset.type==='bar', anchor:'end', align:'top', offset:2, font:{size:10,weight:'700'},
+          color:(ctx)=>{const w=wow[ctx.dataIndex];return w?(w.startsWith('▼')?C_DOWN:C_UP):'transparent';},
+          formatter:(v,ctx)=>wow[ctx.dataIndex]||'' }},
+      scales:{y:{beginAtZero:true,grid:{color:'#eee'}},x:{grid:{display:false}}} }
+  });
+}
+
+makeBarLine('chartMainPV_s',[3782,3091,5556,5189,6663,6238,4426,5941,8139,6587],[
+  {type:'line',label:'PC웹',data:[3342,2754,4820,4440,5137,5321,3237,4301,6492,5434],borderColor:'#333',borderWidth:2,pointRadius:3,fill:false,yAxisID:'y',tension:0.1},
+  {type:'line',label:'M+APP',data:[440,337,736,749,1526,917,1189,1640,1647,1153],borderColor:C_DOWN,borderWidth:1.5,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[4,3]}
+],WOW_MAINPV);
+
+makeBarLine('chartContentPV_s',[1460,902,2858,3044,4287,4069,1927,3008,4733,3540],[
+  {type:'line',label:'PC웹',data:[1089,771,2381,2487,3033,3516,1148,2008,3761,2844],borderColor:'#333',borderWidth:2,pointRadius:3,fill:false,yAxisID:'y',tension:0.1},
+  {type:'line',label:'M+APP',data:[371,131,477,557,1254,553,779,1000,972,696],borderColor:C_DOWN,borderWidth:1.5,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[4,3]}
+],WOW_CONTENTPV);
+
+new Chart(document.getElementById('chartEntry'),{type:'bar',data:{labels:weeksShort,datasets:[
+  {label:'PC 서비스바로가기',data:[1658,1667,1940,1547,1647,1429,1672,1603,1675,1596],backgroundColor:weeksShort.map((_,i)=>i===9?ACCENT+'cc':'#aaa'),
+   datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:9,weight:'700'},color:(ctx)=>{const w=WOW_ENTRY_PC[ctx.dataIndex];return w?(w.startsWith('▼')?C_DOWN:C_UP):'transparent';},formatter:(v,ctx)=>WOW_ENTRY_PC[ctx.dataIndex]||''}},
+  {label:'모바일 프로모션배너',data:[177,85,102,106,178,213,217,304,323,173],backgroundColor:weeksShort.map((_,i)=>i===9?C_DOWN+'88':'#ddd'),
+   datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:9,weight:'700'},color:(ctx)=>{const w=WOW_ENTRY_M[ctx.dataIndex];return w?(w.startsWith('▼')?C_DOWN:C_UP):'transparent';},formatter:(v,ctx)=>WOW_ENTRY_M[ctx.dataIndex]||''}}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}},datalabels:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eee'}}}}});
+
+new Chart(document.getElementById('chartEntryPie'),{type:'doughnut',data:{labels:['PC 서비스바로가기','모바일 프로모션배너'],datasets:[{data:[1596,173],backgroundColor:['#555',C_DOWN+'99']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8}}}}});
+
+new Chart(document.getElementById('chartMainPV_full'),{type:'bar',data:{labels:weeksShort,datasets:[
+  {type:'bar',label:'합계',data:[3782,3091,5556,5189,6663,6238,4426,5941,8139,6587],backgroundColor:weeksShort.map((_,i)=>i===9?ACCENT+'cc':'#ddd'),yAxisID:'y',order:2},
+  {type:'line',label:'PC웹',data:[3342,2754,4820,4440,5137,5321,3237,4301,6492,5434],borderColor:'#333',borderWidth:2,pointRadius:4,fill:false,yAxisID:'y',tension:0.1,order:1},
+  {type:'line',label:'M+APP',data:[440,337,736,749,1526,917,1189,1640,1647,1153],borderColor:C_DOWN,borderWidth:1.5,pointRadius:4,fill:false,yAxisID:'y',tension:0.1,borderDash:[4,3],order:1},
+  {type:'line',label:'M웹',data:[279,196,351,354,579,466,577,902,976,665],borderColor:'#aaa',borderWidth:1,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[2,3],order:1},
+  {type:'line',label:'APP',data:[161,141,385,395,947,451,612,738,671,488],borderColor:C_GREEN,borderWidth:1,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[2,3],order:1}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}},datalabels:{display:(ctx)=>ctx.dataset.type==='bar',anchor:'end',align:'top',offset:2,font:{size:10,weight:'700'},color:(ctx)=>{const w=WOW_MAINPV[ctx.dataIndex];return w?(w.startsWith('▼')?C_DOWN:C_UP):'transparent';},formatter:(v,ctx)=>WOW_MAINPV[ctx.dataIndex]||''}},scales:{y:{beginAtZero:true,grid:{color:'#eee'}},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chartMainPVpie'),{type:'doughnut',data:{labels:['PC웹','M웹','APP'],datasets:[{data:[5434,665,488],backgroundColor:['#444','#aaa',C_DOWN+'99']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:8}}}}});
+
+new Chart(document.getElementById('chartContentPV_full'),{type:'bar',data:{labels:weeksShort,datasets:[
+  {type:'bar',label:'합계',data:[1460,902,2858,3044,4287,4069,1927,3008,4733,3540],backgroundColor:weeksShort.map((_,i)=>i===9?ACCENT+'cc':'#ddd'),yAxisID:'y',order:2},
+  {type:'line',label:'PC웹',data:[1089,771,2381,2487,3033,3516,1148,2008,3761,2844],borderColor:'#333',borderWidth:2,pointRadius:4,fill:false,yAxisID:'y',tension:0.1,order:1},
+  {type:'line',label:'M+APP',data:[371,131,477,557,1254,553,779,1000,972,696],borderColor:C_DOWN,borderWidth:1.5,pointRadius:4,fill:false,yAxisID:'y',tension:0.1,borderDash:[4,3],order:1},
+  {type:'line',label:'M웹',data:[181,67,181,240,474,286,384,517,565,397],borderColor:'#aaa',borderWidth:1,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[2,3],order:1},
+  {type:'line',label:'APP',data:[190,64,296,317,780,267,395,483,407,299],borderColor:C_GREEN,borderWidth:1,pointRadius:3,fill:false,yAxisID:'y',tension:0.1,borderDash:[2,3],order:1}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}},datalabels:{display:(ctx)=>ctx.dataset.type==='bar',anchor:'end',align:'top',offset:2,font:{size:10,weight:'700'},color:(ctx)=>{const w=WOW_CONTENTPV[ctx.dataIndex];return w?(w.startsWith('▼')?C_DOWN:C_UP):'transparent';},formatter:(v,ctx)=>WOW_CONTENTPV[ctx.dataIndex]||''}},scales:{y:{beginAtZero:true,grid:{color:'#eee'}},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chartContentRank'),{type:'bar',data:{labels:['RAM 가격동향','테이프 구매가이드','음식물처리기 비교','SSD 마이너브랜드','글카 골방 테스트','음식물처리기 가루버리기','SSD 게임벤치','공기청정기 추천'],datasets:[{label:'PV',data:[1624,663,446,147,147,119,79,35],backgroundColor:[ACCENT+'cc',C_GREEN+'99',C_GREEN+'88','#ccc','#ccc','#ccc','#ccc','#ccc']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'#eee'}},y:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chartCatPie'),{type:'doughnut',data:{labels:['AMD CPU','RAM','엔비디아VGA','SSD','AMD VGA','인텔CPU'],datasets:[{data:[292,287,274,185,174,105],backgroundColor:['#444','#666','#888','#aaa','#ccc','#ddd']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}}}}});
+
+new Chart(document.getElementById('chartProductMove'),{type:'bar',data:{labels:['5주차','6주차','7주차','8주차','9주차','10주차'],datasets:[
+  {label:'오늘인기순',data:[116,240,365,277,387,212],backgroundColor:ACCENT+'cc',datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:10,weight:'700'},color:'#555',formatter:v=>v}},
+  {label:'판매량순',data:[22,37,52,82,212,48],backgroundColor:'#888',datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:10,weight:'700'},color:'#555',formatter:v=>v}},
+  {label:'하락률순',data:[30,17,69,56,79,49],backgroundColor:'#aaa',datalabels:{display:false}},
+  {label:'상승률순',data:[0,3,18,15,24,24],backgroundColor:'#ccc',datalabels:{display:false}}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}},datalabels:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eee'}}}}});
+
+new Chart(document.getElementById('chartHtml'),{type:'bar',data:{labels:['7주차','8주차','9주차','10주차'],datasets:[
+  {label:'top',data:[441,506,806,317],backgroundColor:ACCENT+'cc',datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:9,weight:'700'},color:'#555',formatter:v=>v}},
+  {label:'middle',data:[107,364,658,644],backgroundColor:'#888',datalabels:{display:true,anchor:'end',align:'top',offset:2,font:{size:9,weight:'700'},color:'#555',formatter:v=>v}},
+  {label:'bottom(유튜브)',data:[132,163,95,156],backgroundColor:'#aaa',datalabels:{display:false}}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}},datalabels:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eee'}}}}});
+
+new Chart(document.getElementById('chartHelp'),{type:'bar',data:{labels:weeksShort,datasets:[
+  {type:'bar',label:'도움이됐어요 클릭',data:[218,22,104,69,83,49,47,33,133,51],backgroundColor:weeksShort.map((_,i)=>i===9?ACCENT+'cc':'#ddd'),yAxisID:'y'},
+  {type:'line',label:'반응률(%)',data:[14.9,2.4,3.6,2.3,1.9,1.2,2.4,1.1,2.8,1.4],borderColor:C_UP,borderWidth:2,pointRadius:4,fill:false,yAxisID:'y2',tension:0.2}
+]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,grid:{color:'#eee'},position:'left'},y2:{beginAtZero:true,position:'right',grid:{display:false},ticks:{callback:v=>v+'%'}},x:{grid:{display:false}}}}});
+
+new Chart(document.getElementById('chartContentClickPie'),{type:'doughnut',data:{labels:['GNB 다나와로고','GNB 답나와로고','도움이됐어요','플로팅_위로','공유하기(합계)','기타'],datasets:[{data:[103,85,51,31,24,13],backgroundColor:['#444','#666',ACCENT+'cc','#aaa','#bbb','#ddd']}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:6}}}}});
+</script>
+</body>
+</html>
