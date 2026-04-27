@@ -1,5 +1,22 @@
 [
   {
+    "week": 11,
+    "title": "11주차 주간 보고서",
+    "period": "4월 20일 - 4월 26일",
+    "filename": "week11.html",
+    "uploadedAt": "2026년 4월 27일",
+    "tags": [
+      {
+        "label": "앱 메인 PV ▲292.6%",
+        "type": "up"
+      },
+      {
+        "label": "앱 푸시 효과",
+        "type": "green"
+      }
+    ]
+  },
+  {
     "week": 10,
     "title": "10주차 주간 보고서",
     "period": "4월 13일 - 4월 20",
