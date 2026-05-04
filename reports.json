@@ -1,5 +1,22 @@
 [
   {
+    "week": 12,
+    "title": "12주차 주간 보고서",
+    "period": "4월 27일 - 5월 3일",
+    "filename": "week12.html",
+    "uploadedAt": "2026년 5월 4일",
+    "tags": [
+      {
+        "label": "메인 PV ▼ 17.7%",
+        "type": "down"
+      },
+      {
+        "label": "콘텐츠 PV ▼ 28.0%",
+        "type": "down"
+      }
+    ]
+  },
+  {
     "week": 11,
     "title": "11주차 주간 보고서",
     "period": "4월 20일 - 4월 26일",
