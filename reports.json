@@ -1,5 +1,22 @@
 [
   {
+    "week": 19,
+    "title": "19주차 주간 보고서",
+    "period": "6월 15일 - 6월 21일",
+    "filename": "week19.html",
+    "uploadedAt": "2026년 6월 22일",
+    "tags": [
+      {
+        "label": "메인 PV ▲ 2.1%",
+        "type": "up"
+      },
+      {
+        "label": "콘텐츠 PV ▲ 11.6%",
+        "type": "up"
+      }
+    ]
+  },
+  {
     "week": 18,
     "title": "18주차 주간 보고서",
     "period": "6월 8일 - 6월 14일",
