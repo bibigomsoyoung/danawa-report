@@ -1,5 +1,22 @@
 [
   {
+    "week": 21,
+    "title": "21주차 주간 보고서",
+    "period": "6월 29일 - 7월 5일",
+    "filename": "week21.html",
+    "uploadedAt": "2026년 7월 6일",
+    "tags": [
+      {
+        "label": "메인 PV ▲ 15.4%",
+        "type": "up"
+      },
+      {
+        "label": "콘텐츠 PV ▲ 29.5%",
+        "type": "up"
+      }
+    ]
+  },
+  {
     "week": 20,
     "title": "20주차 주간 보고서",
     "period": "6월 22일 - 6월 28일",
