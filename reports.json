@@ -1,5 +1,22 @@
 [
   {
+    "week": 23,
+    "title": "23주차 주간 보고서",
+    "period": "7월 13일 - 7월 19일",
+    "filename": "week23.html",
+    "uploadedAt": "2026년 7월 20일",
+    "tags": [
+      {
+        "label": "메인 PV ▼ 11.7%",
+        "type": "down"
+      },
+      {
+        "label": "콘텐츠 PV ▼ 19.4%",
+        "type": "down"
+      }
+    ]
+  },
+  {
     "week": 22,
     "title": "22주차 주간 보고서",
     "period": "7월 6일 - 7월 12일",
